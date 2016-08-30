@@ -1,0 +1,13 @@
+[2016-08-30 18:07:39] START
+[2016-08-30 18:18:46] CREATE dbkrs.py: 0
+[2016-08-30 18:20:14] CREATE bkrstools.py: 0
+[2016-08-30 21:24:34] EDIT dabkrs/models/dbkrs.py: 0
+[2016-08-30 21:25:35] EDIT dabkrs/modules/bkrstools.py: 0
+[2016-08-30 21:28:18] EDIT dabkrs/models/dbkrs.py: 0
+[2016-08-30 21:28:50] EDIT dabkrs/models/dbkrs.py: 0
+[2016-08-30 21:30:16] EDIT dabkrs/models/dbkrs.py: 0
+[2016-08-30 21:36:37] EDIT dabkrs/controllers/slovar.py: 5
+[2016-08-30 21:36:57] EDIT dabkrs/controllers/slovar.py: 0
+[2016-08-30 21:39:58] EDIT dabkrs/modules/bkrstools.py: 12
+[2016-08-30 21:42:22] EDIT dabkrs/controllers/slovar.py: -11
+[2016-08-30 21:42:25] EDIT dabkrs/modules/bkrstools.py: 0
