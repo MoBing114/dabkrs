@@ -5,6 +5,7 @@ sys.setdefaultencoding("utf-8")
 from bkrstools import text_tokenizer
 
 def index():
+    """Действие по умолчанию, показывает таблицу словарной базы данных"""
     form=SQLFORM.grid(
         slovar,
         user_signature=False,
@@ -13,20 +14,23 @@ def index():
     return dict(form=form)
 
 def slovo():
+    """Действие просмотра слова, перенаправляет на страницу просмотра при клике по ссылке"""
     row=db(slovar.slovo==request.vars.slovo).select().first()
-    if row!=None: redirect(URL('index',args=('view','slovo',row.id)))
+    if row!=None: redirect(URL('index',args=('view','slovar',row.id)))#Временно используется форма действия index данного контроллера
 
 def text():
-    form = FORM(INPUT(_id="w2p_keywords",_type="text",_name="text",_class="form-control",_value=request.vars.text),
-                    INPUT(_type="submit",_class="btn btn-default",_value="Поиск"),
-                    keepvalues=True,
-                    _class="form-search", _action=URL('text')
+    """Действие создает поисковую форму, обрабатывает полученный текст и передает выборку из базы данных в представление"""
+    #Поисковая форма
+    form = FORM(INPUT(_id="w2p_keywords",_type="text",_name="text",_class="form-control",_value=request.vars.text),#Поле ввода текста
+                    INPUT(_type="submit",_class="btn btn-default",_value="Поиск"),#Кнопка "поиск"
+                    keepvalues=True,#Удерживать значения
+                    _class="form-search", _action=URL('text')#Класс готового стиля оформления и действие контроллера, который обработает нажатие кнопки (которое в общем то и создает форму)
                    )
     rez=[]
     text=""
-    if form.process().accepted:
-        text=unicode(request.vars.text, 'utf-8')
-        rez=db(slovar.slovo==text).select().first()
+    if form.process().accepted:#Обработка нажатия кнопки формы поиска
+        text=unicode(request.vars.text, 'utf-8')#Декодируем строку на всякий случай
+        rez=db(slovar.slovo==text).select().first()#Пробуем найти всю строку
         if rez!=None:
             rez=[[rez.slovo,rez.pinyin,rez.perevod,1]]
             return dict(form=form, rez=rez, text=text)

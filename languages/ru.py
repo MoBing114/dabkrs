@@ -214,6 +214,7 @@
 'Stylesheet': 'Stylesheet',
 'submit': 'submit',
 'Submit': 'Отправить',
+'Success!': 'Success!',
 'Support': 'Support',
 'Sure you want to delete this object?': 'Подтвердите удаление объекта',
 'Table': 'таблица',

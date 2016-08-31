@@ -65,10 +65,10 @@ def repres_perevod(perevod,*args):
 def create_spisok(text,*args):
     """Функция очищает html представление словарной стати путем замены соответствующих тэгов"""
     text=repres_perevod(text)
-    text.elements('a',
-                  replace=lambda ref:
-                  DIV(*[repres_perevod(x[0].perevod)[:] for x in [db(slovar.slovo==ref["_slovo"]).select(slovar.perevod)] if x!=None],_class="links")
-                 )
+    #text.elements('a',
+                  #replace=lambda ref:
+                  #DIV(*[repres_perevod(x[0].perevod)[:] for x in [db(slovar.slovo==ref["_slovo"]).select(slovar.perevod)] if x!=None],_class="links")
+                 #)
     text.elements('div.ex', replace=None)#Убираем примеры
     text.elements('i', replace=None)#Убираем курсив
     text.elements('span', replace=None)#Убираем разрывы

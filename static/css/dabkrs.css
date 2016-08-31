@@ -1,0 +1,40 @@
+.ru{height:200px;position:relative;background:#fff;border:1px solid #D8DFEA;float:left;overflow: auto;}
+.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt}
+.py {font-size:12pt}
+.slovo{float: left;width: 25%;}
+.highlight {background-color: yellow}
+.m1{margin-left:0.5em;font-size:12pt;font:bold}
+.m2{margin-left:1em}
+.m3{margin-left:1.5em}
+.m4{margin-left:2em}
+.green {color:green}
+.ex {color:#666666}
+.maroon {color:maroon}
+.white {color:white}
+.gray {color:gray}
+.black {color:black}
+.red {color:red}
+.center {text-align:center}
+.brown {color:brown}
+.crimson {color:crimson}
+.bold {font-weight:bold}
+.pt8 {font-size:8pt}
+.pt9 {font-size:9pt}
+.pt10 {font-size:10pt}
+.pt11 {font-size:11pt}
+.pt12 {font-size:12pt}
+.pt13 {font-size:13pt}
+.pt14 {font-size:14pt}
+.pt16 {font-size:16pt}
+.pt18 {font-size:18pt}
+.pt20 {font-size:20pt}
+.pr25 {width:25%;}
+.vtop {vertical-align:top}
+.margin_left {margin:0 50px}
+a:hover.black {color:black}
+.img-middle {vertical-align:middle}
+.foat_left {float:left}
+.foat_right {float:right}
+.hidden {display:none}
+.pointer {cursor:pointer}
+.arial {font-family:arial}
