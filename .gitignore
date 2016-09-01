@@ -3,6 +3,7 @@
 *.bak
 *.pyc
 *.swap
+*.log
 git-credential*
 *.backup
 .project
@@ -18,4 +19,3 @@ errors/
 sessions/
 uploads/
 .hg/
-progress.log

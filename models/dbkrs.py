@@ -5,18 +5,19 @@ slovar = db.define_table('slovar',
                              Field('pinyin',label="Пиньин"),
                              Field('perevod',"text",label="Перевод"),
                              Field('dlina','integer',compute=lambda row:len(row.slovo),label="Длина"),
-                             Field('sostav','list:reference slovar'),
-                             Field('links','list:reference slovar'),
-                             Field.Virtual('spisok',lambda row:"",label="Список"),
-                             #migrate=True, fake_migrate=True,
-                             rname="dabkrs"
+                             Field('sostav','list:reference slovar',label="Состав"),
+                             Field('links','list:reference slovar',label="Ссылается"),
+                             Field.Virtual('short',lambda row:"",label="Краткая форма"),
+                             #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
+                             #rname="dabkrs"#если таблица в базе имеет другое реальное имя, то задать реальное имя  (для полей тоже есть rname, на случай миграции с другой БД)
                         )
-
-slovar.perevod.represent=repres_perevod
-slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")
-slovar.pinyin.represent=lambda pinyin,row:DIV(pinyin,_class="py")
-slovar.sostav.represent=lambda value,row: DIV(*[
-        A(slovar[x].slovo+", ",_href='%(link)s?slovo=%(slovo)s'%dict(link=URL("slovo"), slovo=slovar[x].slovo))
-                for x in value])
-#slovar.links.represent=lambda value,row: DIV(*[repres_perevod(slovar[x].perevod) for x in value])
-slovar.spisok.represent=lambda value,row: create_spisok(row.perevod)
+#Html - представления полей, используемые по умолчанию
+slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
+slovar.pinyin.represent=lambda pinyin,row:DIV(pinyin,_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
+slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-тэги, помещаем в контейнеры, чтобы применить стили оформления согласно классам
+slovar.sostav.represent=lambda value,row: "" if value==None else DIV(*[#Контейнер со ссылками на просмотр
+        A(slovar[x].slovo+", ",#Отображаемое значение
+            _href='%(link)s?slovo=%(slovo)s'%dict(link=URL("slovo"), slovo=slovar[x].slovo))#Собственно ссылка
+        for x in value])#Цикл по списку id ссылочных полей
+slovar.links.represent=lambda value,row: "" if value==None else DIV(*[repres_perevod(slovar[x].perevod) for x in value])#Получаем html-представление всех помеченных [ref].*[/ref] слов в переводе
+slovar.short.represent=lambda value,row: create_spisok(row.perevod)#Сокращенная форма перевода (убраны лишние комментарии и примеры)
