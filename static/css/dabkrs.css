@@ -1,4 +1,4 @@
-.ru{height:200px;position:relative;background:#fff;border:1px solid #D8DFEA;float:left;overflow: auto;}
+.ru{max-height:200px;position:relative;background:#fff;border:1px solid #D8DFEA;float:left;overflow: auto;}
 .ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt}
 .py {font-size:12pt}
 .slovo{float: left;width: 25%;}

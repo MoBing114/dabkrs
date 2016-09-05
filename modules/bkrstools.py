@@ -13,6 +13,7 @@ reg_b=re.compile(r"\[b\](.*?)\[/b\]")#B()
 reg_p=re.compile(r"\[p\](.*?)\[/p\]")#I()
 reg_skobki=re.compile(r"(\(.*?\))")#SPAN()
 reg_numerate=re.compile(r"([^\d])(\d{1,2})[).]")#SPAN()
+reg_alfavite=re.compile(r"([abcdабвг])\)")#SPAN()
 reg_m=re.compile(r"\[m([1-4])\](.*?)\[/m\]")#DIV()
 reg_e=re.compile(r"\[e\](.*?)\[/e\]")#DIV()
 reg_ex=re.compile(r"\[ex\](.*?)\[/ex\]")#DIV()
@@ -51,10 +52,11 @@ def repres_perevod(perevod,*args):
     #Текст может содержать тэги ссылок, создадим ссылку на действие контроллера slovo для обработки нажатия этих ссылок
     link=URL("slovo")
     perevod=reg_ref.sub(r"<a href='%s\?slovo=\1' slovo='\1'>\1</a>"%link,perevod)#Заменяем тэги ссылок [ref] на html тэги
+    #perevod=reg_alfavite.sub(r"<span'>\1.</span>",perevod)#Выделяем буквенное перечисление
+    perevod=reg_numerate.sub(r"\1<span'>\2.</span>",perevod)#Выделяем нумерованное перечисление
     perevod=reg_c.sub(r"<span>\1</span>",perevod)#Заменяем тэги выделения на html тэги
     for color,reg_ccolor in reg_ccolors.items():
         perevod=reg_ccolor.sub(r"<span class='%s'>\1</span>"%color,perevod)#Заменяем тэги выделения цветом на html тэги
-    perevod=reg_numerate.sub(r"\1<span'>\2.</span>",perevod)#Выделяем нумерацию
     perevod=reg_skobki.sub(r"<span>\1</span>",perevod)#Всё что в скобках обозначаем как span
     perevod=reg_i.sub(r"<i class='green'>\1</i>",perevod)#Заменяем тэги курсива [i] на html тэги
     perevod=reg_p.sub(r"<i class='green'>\1</i>",perevod)#Заменяем тэги пометок [p] на html тэги
@@ -69,9 +71,15 @@ def repres_perevod(perevod,*args):
 
     return DIV(TAG(bs(perevod).prettify()),_class="ru")#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup, и помещаем в блок
 
-def create_spisok(text,*args):
+def split_perevod(div):
+    text=div.flatten().strip()
+    text=text.replace(",",";")
+    sep=";"# if ";" in text else ","
+    return CAT(*[LI(x.strip()) for x in text.split(sep) if x.strip()!=""])
+
+def sokr_perevod(text,*args):
     """Функция очищает, сокращает html представление словарной статьи путем замены соответствующих тэгов"""
-    tagObj=repres_perevod(text)#Возвращает уже объект, а не текст
+    tagObj=repres_perevod(text)#Возвращает уже объект класса TAG, а не текст
     #text.elements('a',
                   #replace=lambda ref:
                   #DIV(*[repres_perevod(x[0].perevod)[:] for x in [db(slovar.slovo==ref["_slovo"]).select(slovar.perevod)] if x!=None],_class="links")
@@ -81,7 +89,7 @@ def create_spisok(text,*args):
     tagObj.elements('span', replace=None)#Убираем разрывы
     tagObj.elements('b', replace=None)#Убираем жирный
     tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: "" if div.flatten().strip()=="" else div)#Удаляем пустые блоки
-
+    tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=split_perevod)#Непустые блоки преобразуем в элементы списка
     return tagObj
 
 def text_tokenizer(txt):

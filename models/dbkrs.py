@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from bkrstools import repres_perevod,create_spisok
+from bkrstools import repres_perevod,sokr_perevod
 slovar = db.define_table('slovar',
                              Field('slovo','string',unique=True,label="Слово"),
                              Field('pinyin',label="Пиньин"),
@@ -20,4 +20,4 @@ slovar.sostav.represent=lambda value,row: "" if value==None else DIV(*[#Конт
             _href='%(link)s?slovo=%(slovo)s'%dict(link=URL("slovo"), slovo=slovar[x].slovo))#Собственно ссылка
         for x in value])#Цикл по списку id ссылочных полей
 slovar.links.represent=lambda value,row: "" if value==None else DIV(*[repres_perevod(slovar[x].perevod) for x in value])#Получаем html-представление всех помеченных [ref].*[/ref] слов в переводе
-slovar.short.represent=lambda value,row: create_spisok(row.perevod)#Сокращенная форма перевода (убраны лишние комментарии и примеры)
+slovar.short.represent=lambda value,row: sokr_perevod(row.perevod)#Сокращенная форма перевода (убраны лишние комментарии и примеры)
