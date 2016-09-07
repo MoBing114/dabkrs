@@ -1,6 +1,6 @@
 {{highlight_web2py_grid=False}}
 {{extend 'layout.html'}}
-{{from bkrstools import create_spisok}}
+{{from bkrstools import sokr_perevod,repres_perevod}}
 <!-- Скрипт для выделения искомого текста -->
 {{=SCRIPT(_src=URL('static','js/jquery.highlight.js'), _type='text/javascript')}}
 <link rel="stylesheet" href="{{=URL('static','css/dabkrs.css')}}"/>
@@ -9,6 +9,6 @@
 {{=DIV(text,_class="iskomyi-text")}}
 <div>
 {{for x in rez:}}
-{{=DIV(TABLE(TR(x[0]),TR(x[1]),TR(create_spisok(x[2]))),_class="slovo", _position=str(x[3])+"-"+str(x[3]+len(x[0])-1),_slovo=x[0])}}
+{{=DIV(TABLE(TR(x[0]),TR(x[1]),TR(repres_perevod(x[2],x[0]))),_class="slovo", _position=str(x[3])+"-"+str(x[3]+len(x[0])-1),_slovo=x[0])}}
 {{pass}}
 </div>

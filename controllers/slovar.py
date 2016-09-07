@@ -2,7 +2,7 @@
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-from bkrstools import text_tokenizer,create_spisok
+from bkrstools import text_tokenizer
 
 def index():
     """Действие по умолчанию, показывает таблицу словарной базы данных"""

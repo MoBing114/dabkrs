@@ -24,12 +24,11 @@ def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки]) синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
     perevod=unicode(text, 'utf-8')
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
-    #perevod=perevod.replace("([i]","[i](")
-    #perevod=perevod.replace("[/i])",")[/i]")
-    #perevod=perevod.replace("(","[i]")
-    #perevod=perevod.replace(")","[/i]")
-    #perevod=perevod.replace("([c]","[c](")
-    #perevod=perevod.replace("[/c])",")[/c]")
+    perevod=perevod.replace("([i]","[i](")
+    perevod=perevod.replace("[/i])",")[/i]")
+    perevod=perevod.replace("([c]","[c](")
+    perevod=perevod.replace("[/c])",")[/c]")
+    perevod=perevod.replace("[i];[/i]",";")
     perevod1=[]#Список отбработанных частей
     #разобъем строку по закрывающему тэгу абзаца "[/m]"
     for x in perevod.split("[/m]"):
@@ -65,35 +64,51 @@ def repres_perevod(perevod,*args):
     perevod=reg_e.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [e] на html тэги
     perevod=reg_ex.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [ex] на html тэги
     perevod=reg_x.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [*] на html тэги
-    perevod=perevod.replace("\[","[")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
-    perevod=perevod.replace("\]","]")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
+    perevod=perevod.replace("\[","<span>[")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
+    perevod=perevod.replace("\]","]</span>")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=re.sub(r"<div class='m[1-4]'>\s*</div>","",perevod)#Удаляем пустые блоки(содержащие пробельные символы)
 
     return DIV(TAG(bs(perevod).prettify()),_class="ru")#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup, и помещаем в блок
 
-def split_perevod(div):
+def split_perevod(div,slovo):
+    """Разбивает текст в блоках div сласса m[1-4] на варианты перевода в зависимости от вида разделителя ("," или ";") и возвращает элементы списка LI"""
     text=div.flatten().strip()
-    text=text.replace(",",";")
-    sep=";"# if ";" in text else ","
+    #text=text.replace(",",";")
+    if ";" in text:
+        sep=";"
+    else:
+        sep= ","
+    if re.search(r"[，、。]",slovo):sep=";"
     return CAT(*[LI(x.strip()) for x in text.split(sep) if x.strip()!=""])
 
-def sokr_perevod(text,*args):
+def sokr_perevod(perevod,slovo,*args):
     """Функция очищает, сокращает html представление словарной статьи путем замены соответствующих тэгов"""
-    tagObj=repres_perevod(text)#Возвращает уже объект класса TAG, а не текст
-    #text.elements('a',
+    tagObj=repres_perevod(perevod)#Возвращает уже объект класса TAG, а не текст
+    perevod_po_silke=[]
+    for ref in tagObj.elements('a'):
+        ref_perevod=current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod)
+        if ref_perevod!=None:
+            perevod_po_silke.append(repres_perevod(ref_perevod[0].perevod)[:])
+    tagObj.append(CAT(*perevod_po_silke))
+    tagObj.elements('a',replace=None)
+    #tagObj.elements('a',
                   #replace=lambda ref:
-                  #DIV(*[repres_perevod(x[0].perevod)[:] for x in [db(slovar.slovo==ref["_slovo"]).select(slovar.perevod)] if x!=None],_class="links")
+                  #CAT(*[repres_perevod(x[0].perevod)[:] for x in [current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod)] if x!=None])
                  #)
     tagObj.elements('div.ex', replace=None)#Убираем примеры
     tagObj.elements('i', replace=None)#Убираем курсив
     tagObj.elements('span', replace=None)#Убираем разрывы
     tagObj.elements('b', replace=None)#Убираем жирный
     tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: "" if div.flatten().strip()=="" else div)#Удаляем пустые блоки
-    tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=split_perevod)#Непустые блоки преобразуем в элементы списка
+    tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: split_perevod(div,slovo))#Непустые блоки преобразуем в элементы списка
+    values=[]
+    for value in [x.flatten().strip() for x in tagObj.elements('li')]:
+        if not value in values: values.append(value)
+    tagObj=DIV(UL(values),_class="ru")
     return tagObj
 
 def text_tokenizer(txt):
-    #Разбирает на отдельные иеролифы(символы) или их возможные сочетания(состоящие из 1 до n-1 символов)
+    """Разбирает на отдельные иеролифы(символы) или их возможные сочетания(состоящие из 1 до n-1 символов)"""
     txt=txt.decode()
     n=len(txt)
     if n==1:return [txt]
