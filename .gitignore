@@ -1,5 +1,6 @@
 *.DS_Store
 *~
+*.dsl
 *.bak
 *.pyc
 *.swap

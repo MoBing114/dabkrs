@@ -13,7 +13,7 @@ reg_b=re.compile(r"\[b\](.*?)\[/b\]")#B()
 reg_p=re.compile(r"\[p\](.*?)\[/p\]")#I()
 reg_skobki=re.compile(r"(\(.*?\))")#SPAN()
 reg_numerate=re.compile(r"([^\d])(\d{1,2})[).]")#SPAN()
-reg_alfavite=re.compile(r"([abcdабвг])\)")#SPAN()
+reg_alfavite=re.compile(u"([^a-zа-я]+[abcdeабвгд])\)")#SPAN()
 reg_m=re.compile(r"\[m([1-4])\](.*?)\[/m\]")#DIV()
 reg_e=re.compile(r"\[e\](.*?)\[/e\]")#DIV()
 reg_ex=re.compile(r"\[ex\](.*?)\[/ex\]")#DIV()
@@ -51,7 +51,7 @@ def repres_perevod(perevod,*args):
     #Текст может содержать тэги ссылок, создадим ссылку на действие контроллера slovo для обработки нажатия этих ссылок
     link=URL("slovo")
     perevod=reg_ref.sub(r"<a href='%s\?slovo=\1' slovo='\1'>\1</a>"%link,perevod)#Заменяем тэги ссылок [ref] на html тэги
-    #perevod=reg_alfavite.sub(r"<span'>\1.</span>",perevod)#Выделяем буквенное перечисление
+    perevod=reg_alfavite.sub(r"<span'>\1.</span>",perevod)#Выделяем буквенное перечисление
     perevod=reg_numerate.sub(r"\1<span'>\2.</span>",perevod)#Выделяем нумерованное перечисление
     perevod=reg_c.sub(r"<span>\1</span>",perevod)#Заменяем тэги выделения на html тэги
     for color,reg_ccolor in reg_ccolors.items():
@@ -68,33 +68,26 @@ def repres_perevod(perevod,*args):
     perevod=perevod.replace("\]","]</span>")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=re.sub(r"<div class='m[1-4]'>\s*</div>","",perevod)#Удаляем пустые блоки(содержащие пробельные символы)
 
-    return DIV(TAG(bs(perevod).prettify()),_class="ru")#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup, и помещаем в блок
+    return TAG(bs(perevod).prettify())#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup
 
 def split_perevod(div,slovo):
     """Разбивает текст в блоках div сласса m[1-4] на варианты перевода в зависимости от вида разделителя ("," или ";") и возвращает элементы списка LI"""
     text=div.flatten().strip()
-    #text=text.replace(",",";")
-    if ";" in text:
-        sep=";"
-    else:
-        sep= ","
-    if re.search(r"[，、。]",slovo):sep=";"
+    sep=","
+    if ";" in text or re.search(u"[，、。]",slovo)!=None:sep=";"
     return CAT(*[LI(x.strip()) for x in text.split(sep) if x.strip()!=""])
 
 def sokr_perevod(perevod,slovo,*args):
     """Функция очищает, сокращает html представление словарной статьи путем замены соответствующих тэгов"""
     tagObj=repres_perevod(perevod)#Возвращает уже объект класса TAG, а не текст
+    #slovo=unicode(slovo, 'utf-8')#В юникод сразу, чтобы не было проблем
     perevod_po_silke=[]
     for ref in tagObj.elements('a'):
-        ref_perevod=current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod)
+        ref_perevod=current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod).first()
         if ref_perevod!=None:
-            perevod_po_silke.append(repres_perevod(ref_perevod[0].perevod)[:])
+            perevod_po_silke.append(repres_perevod(ref_perevod.perevod))
     tagObj.append(CAT(*perevod_po_silke))
     tagObj.elements('a',replace=None)
-    #tagObj.elements('a',
-                  #replace=lambda ref:
-                  #CAT(*[repres_perevod(x[0].perevod)[:] for x in [current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod)] if x!=None])
-                 #)
     tagObj.elements('div.ex', replace=None)#Убираем примеры
     tagObj.elements('i', replace=None)#Убираем курсив
     tagObj.elements('span', replace=None)#Убираем разрывы
@@ -104,18 +97,56 @@ def sokr_perevod(perevod,slovo,*args):
     values=[]
     for value in [x.flatten().strip() for x in tagObj.elements('li')]:
         if not value in values: values.append(value)
-    tagObj=DIV(UL(values),_class="ru")
+    tagObj=UL(values)
     return tagObj
 
 def text_tokenizer(txt):
     """Разбирает на отдельные иеролифы(символы) или их возможные сочетания(состоящие из 1 до n-1 символов)"""
     txt=txt.decode()
-    n=len(txt)
-    if n==1:return [txt]
-    x=range(n)
-    rez=[]
-    for g in x:
-        for i in x:
-            if i+g>n or i==i+g:continue
-            rez.append(txt[i:i+g])
-    return set(rez)
+    re_pass=re.compile(u"[ 。.]")#Пропускаемые слова
+    maxn=15#Макс.длина слова
+    n=len(txt)#Длина текста
+    l=n if n<maxn else maxn
+    slovlist={}#Словарь со словами в ключах и списком координат в тексте
+    for i in range(1,l+1):
+        for j in range(i):
+            for x in re.finditer(r".{%d}"%(i),txt[j:]):
+                key=x.group(0)
+                value=[(x.start()+j,x.end()+j)]
+                if key in slovlist:
+                    slovlist[key].extend(value)
+                else:
+                    slovlist[key]=value
+    return slovlist
+
+def test(text):
+    text=unicode(text, 'utf-8')#Декодируем строку на всякий случай
+    db=current.db
+    slovar=current.slovar
+    slovlist=text_tokenizer(text)
+    
+    
+    rez=db(slovar.slovo==text).select().first()#Пробуем найти всю строку
+    if rez!=None:
+        rez=[[rez.slovo,rez.pinyin,rez.perevod,1]]
+        return rez
+    #Словарь с ключами из слов и значениями из списка пиньин перевод
+    rez={unicode(y.slovo, 'utf-8'):[y.pinyin,y.perevod]
+         for y in [db(slovar.slovo==sl).select().first()
+                   for sl in text_tokenizer(text)] if y!=None}
+
+    z={i:[x for x in rez.keys() if text[i:i+len(x)]==x] for i in range(len(text))}
+
+    for i in z.keys():
+        z[i].sort(key=len,reverse=True)
+        if z[i]!=[]:
+            z[i]=z[i][0]
+        else:
+            z[i]=text[i]
+
+    nabor={i:"|"+"|".join(str(x) for x in range(i,i+len(z[i])))+"|" for i in z.keys()}
+    for i,x in nabor.items():
+        for j,y in nabor.items():
+            if y in x and y!=x: z[j]=""
+
+    rez=[[slovo,rez.get(slovo,["",""])[0],rez.get(slovo,["",""])[1],i] for i,slovo in z.items() if slovo!=""]

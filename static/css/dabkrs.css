@@ -1,7 +1,24 @@
-.ru{max-height:200px;position:relative;background:#fff;border:1px solid #D8DFEA;float:left;overflow: auto;}
-.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt}
-.py {font-size:12pt}
-.slovo{float: left;width: 25%;}
+.iskomyi-text{font-size:16pt;text-align:center;}
+.shkatulka-slov{}
+.slovo:not(:only-of-type){
+    display:inline-block;
+    width: 24%;
+    height: 200px;
+    line-height: normal;
+    vertical-align: top;
+    margin-bottom: 10px;
+    /*background: #E76D13;*/
+    overflow: hidden;
+    text-overflow:ellipsis;
+}
+.slovo{height: auto;width:auto;}
+.slovo:hover {
+    height: auto;
+    /*overflow: show;*/
+}
+.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt;text-align: center;}
+.py {font-size:12pt;text-align: center;}
+/*.ru{max-height:200px;position:relative;background:#fff;border:1px solid #D8DFEA;float:left;overflow: auto;}*/
 .highlight {background-color: yellow}
 .m1{margin-left:0.5em;font-size:12pt;font:bold}
 .m2{margin-left:1em}

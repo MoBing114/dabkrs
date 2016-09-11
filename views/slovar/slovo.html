@@ -1,0 +1,21 @@
+{{response.files.extend([
+URL('static','js/jquery.highlight.js'),
+URL('static','js/slovo-highlight.js'),
+URL('static','css/dabkrs.css')
+])}}
+{{extend 'layout.html'}}
+{{=DIV(
+    CENTER(
+        FORM(
+            INPUT(_id="w2p_keywords",
+                     _type="text",_name="text",_class="form-control",_value=request.vars.text,
+                     _onchange="ajax('"+URL('slovar','echo')+"', ['text'], 'shkatulka-slov')"
+                ),
+            #INPUT(_type="submit",_class="btn btn-default",_value="Поиск"),
+            _class="form-search",
+            _action=""
+            )
+          ),
+_class="web2py_console"
+)}}
+{{=DIV(_id="shkatulka-slov")}}

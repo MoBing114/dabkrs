@@ -1,14 +1,22 @@
-{{highlight_web2py_grid=False}}
+{{response.files.extend([
+URL('static','js/jquery.highlight.js'),
+URL('static','js/slovo-highlight.js'),
+URL('static','css/dabkrs.css')
+])}}
 {{extend 'layout.html'}}
 {{from bkrstools import sokr_perevod,repres_perevod}}
-<!-- Скрипт для выделения искомого текста -->
-{{=SCRIPT(_src=URL('static','js/jquery.highlight.js'), _type='text/javascript')}}
-<link rel="stylesheet" href="{{=URL('static','css/dabkrs.css')}}"/>
-<h1>Это шаблон dabkrs/text.html</h1>
-{{=DIV(form,_class="web2py_console")}}
+{{=DIV(CENTER(form),_class="web2py_console")}}
 {{=DIV(text,_class="iskomyi-text")}}
-<div>
+<div class="shkatulka-slov">
+{{proc_func=repres_perevod if len(rez)==1 else sokr_perevod}}
 {{for x in rez:}}
-{{=DIV(TABLE(TR(x[0]),TR(x[1]),TR(repres_perevod(x[2],x[0]))),_class="slovo", _position=str(x[3])+"-"+str(x[3]+len(x[0])-1),_slovo=x[0])}}
+{{=DIV(
+    A(DIV(x[0],_class="ch"),_href=URL("text",vars=dict(text=x[0]))),
+    DIV(x[1],_class="py"),
+    DIV(proc_func(x[2],x[0]),_class="ru"),
+    _class="slovo",
+    _position=str(x[3])+"-"+str(x[3]+len(x[0])-1),
+    _slovo=x[0])
+    }}
 {{pass}}
 </div>
