@@ -14,7 +14,7 @@
 .slovo{height: auto;width:auto;}
 .slovo:hover {
     height: auto;
-    /*overflow: show;*/
+    overflow: show;
 }
 .ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt;text-align: center;}
 .py {font-size:12pt;text-align: center;}

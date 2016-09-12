@@ -27,7 +27,10 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('Home'), False, URL('default', 'index'), [])
+    (T('Home'), False, URL('default', 'index'), []),
+    ("Весь словарь", False, URL('slovar', 'index'), []),
+    ("Пословный", False, URL('slovar', 'slovo'), []),
+    ("Мастерская", False, URL('bkrsmaster', 'index'), []),
 ]
 
 DEVELOPMENT_MENU = False

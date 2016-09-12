@@ -9,6 +9,23 @@ def index():
             advanced_search=False
         )
                )
+def get_file_name(form):
+    if request.vars.dictfile!=None:
+        form.vars.dictfilename = request.vars.dictfile.filename
+
+def obrabotka(file):
+    pass
+
+def slovari():
+    grid = SQLFORM.grid(istochniki,
+                    csv=False,
+                    showbuttontext=False,
+                    advanced_search=False,
+                    selectable = [('Обработать',obrabotka)],
+                    onvalidation=get_file_name
+                   )
+    return dict(grid=grid)
+
 def tasks():
     return dict(
         form=SQLFORM.smartgrid(
