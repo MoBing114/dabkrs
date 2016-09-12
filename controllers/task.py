@@ -27,3 +27,8 @@ def addtask():
                          timeout=10800,
                          sync_output=2)
     return redirect(URL('tasks'))
+def indexing():
+    db.executesql('CREATE INDEX IF NOT EXISTS slovoidx ON slovar (slovo);')
+    db.executesql('CREATE INDEX IF NOT EXISTS pinyinidx ON slovar (pinyin);')
+    db.executesql('CREATE INDEX IF NOT EXISTS perevodidx ON slovar (perevod);')
+    return "Индексация выполнена"
