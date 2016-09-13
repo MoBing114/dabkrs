@@ -124,14 +124,14 @@ def text_tokenizer(txt):
 from gluon.storage import Storage#Аналог словаря, ведет как словарь, ключи являются атрибутами, но не вызывает исключения при отсутсвии ключа, а просто выдает None
 from itertools import takewhile
 
-def test(text):
+def reshala(text):
     #text=unicode(text, 'utf-8')#Декодируем строку на всякий случай
     db=current.db
     slovar=current.slovar
     #Пробуем найти всю строку
     row=db(slovar.slovo==text).select().first()
     if row!=None:
-        zagotovka=[
+        bolvanka=[
             Storage(
                 slovo=unicode(row.slovo, 'utf-8'),
                 pinyin=row.pinyin,
@@ -141,61 +141,58 @@ def test(text):
                 dlina=len(unicode(row.slovo, 'utf-8'))
             )
         ]
-        return zagotovka
+        return bolvanka
     #Если не найдено до переходим к пословному поиску
     slovlist=text_tokenizer(text)
-    return slovlist
-    zagotovka=[]
-    #Список словарей с ключами из слов, пиньин, перевода и позиции в исходном тексте
+    bolvanka=Storage()
     for key,positions in slovlist.items():
         y=db(slovar.slovo==key).select().first()
         if y==None:continue
         for start,end in positions:
-            zagotovka.append(
-                Storage(
-                    slovo=unicode(y.slovo, 'utf-8'),
+            value=Storage(
+                    slovo=y.slovo,
                     pinyin=y.pinyin,
                     perevod=y.perevod,
                     start=start,
                     end=end,
                     dlina=end-start
                 )
+            if bolvanka[start]==None:
+                bolvanka[start]=value
+            elif value.dlina>bolvanka[start].dlina:
+                bolvanka[start]=value
+    if bolvanka[0]==None:return bolvanka
+    n=len(text)
+    for i in range(n):
+        if i not in bolvanka:
+            bolvanka[i]=Storage(
+                slovo=text[i],
+                pinyin="",
+                perevod=None,
+                start=i,
+                end=i+1,
+                dlina=1
             )
-    #сортируем по начальной позиции
-    zagotovka.sort(key=lambda x:x.start)
-    #Сгруппируем по позиции начала слова и создадим словарь, ключи-стартовая позиция, значения-список начинающихся с этой позиции слов
-    zagotovka={i:list(takewhile(lambda x:x.start==i,zagotovka)) for i in range(len(text))}
-    #Оставим в списке только длинные слова,пустые списки заменим объектом Storage без перевода и пиньина
-    for i in zagotovka.keys():
-        zagotovka[i].sort(key=lambda x:x.dlina,reverse=True)
-        if zagotovka[i]!=[]:
-            zagotovka[i]=zagotovka[i][0]
+    i=0
+    while i<n:
+        if bolvanka[i].perevod==None and bolvanka[i-1].perevod!=None:
+            start=i
+            i+=1
+        elif bolvanka[i].perevod==None:
+            bolvanka[start].slovo+=bolvanka[i].slovo
+            bolvanka[start].perevod=""
+            bolvanka[start].end+=1
+            bolvanka[start].dlina+=1
+            i+=1
         else:
-            zagotovka[i]=Storage(slovo=text[i],start=i,end=i+1,dlina=1)
-    #Формируем список ключей на удаление
-    paskey=[]
-    for i in zagotovka.keys():
-        for x in zagotovka.values():
-            if i in range(x.start,x.end) and not i in paskey: paskey.append(i)
-    #Удаляем ключи
-    for i in paskey:
-        del zagotovka[i]
-    #Идущие сподряд элементы без перевода объединяем в один элемент
-    #Для этого получаем и сортируем список индексов слов
-    keylist=list(zagotovka.keys())
-    keylist.sort()
-    #формируем список из индексов для слов без перевода и разделителя "|" для остальных и сцепляем в строчную переменную с разделителем ","
-    truelist=",".join([str(x) if str(zagotovka[x].perevod==None) else "|" for x in keylist])
-    #Расцепляем строку обратно в список по разделителю "|" с фильтрацией по ""
-    truelist=filter(lambda x:x==None,truelist.split("|"))
-    #Каждый элемент списка расцепляем в список по разделителю "," с фильтрацией по "" и преобразованием в целое каждого элемента подсписка
-    truelist=[[int(y) for y in filter(lambda z:z==None,x.split(","))] for x in truelist]
-    #Объединяем, записываем в первый ключ и удаляем устальные ключи слов без перевода
-    for x in truelist:
-        key=x.pop(0)
-        for y in x:
-            zagotovka[key].slovo+=zagotovka[y].slovo
-            del zagotovka[y]
-    zagotovka=list(zagotovka.values())
-    zagotovka.sort(key=lambda x:x.start)
-    return zagotovka
+            i+=1
+    nabor={i:"|"+"|".join(str(x) for x in range(i,bolvanka[i].end))+"|" for i in bolvanka.keys()}
+    for i,x in nabor.items():
+        for j,y in nabor.items():
+            if y in x and y!=x: bolvanka[j].perevod=None
+    for key,value in bolvanka.items():
+        if value.perevod==None:
+            del bolvanka[key]
+    bolvanka=list(bolvanka.values())
+    bolvanka.sort(key=lambda x:x.start)
+    return bolvanka

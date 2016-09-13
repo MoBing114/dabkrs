@@ -1,17 +1,16 @@
 {{response.files.extend([
 URL('static','js/jquery.highlight.js'),
-URL('static','js/slovo-highlight.js'),
-URL('static','css/dabkrs.css')
+URL('static','css/dabkrs.css'),
+URL('static','js/bkrs-ajax.js'),
+#URL('static','js/slovo-highlight.js'),
 ])}}
 {{extend 'layout.html'}}
-{{=DIV(
-    CENTER(
-        #FORM(
-            INPUT(_id="w2p_keywords",
-                     _type="text",_name="slovo",_class="form-control",_value=request.vars.slovo,
-                     _onkeypress="ajax('"+URL('slovar','otvet')+"', ['slovo'], 'shkatulka-slov')"
-                ),
-          ),
+{{=DIV(CENTER(
+FORM(
+INPUT(_type="text",_name="slovo",_class="form-control",_id="slovo"),
+INPUT(_type="submit"),
+_id="myform",
+_action=""),
 _class="web2py_console"
-)}}
+))}}
 {{=DIV(ajaxotvet,_id="shkatulka-slov")}}
