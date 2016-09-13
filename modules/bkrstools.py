@@ -100,18 +100,20 @@ def sokr_perevod(perevod,slovo,*args):
     tagObj=UL(values)
     return tagObj
 
+re_pass=re.compile(u"[ 。.а-яёА-ЯЁa-zA-Z0-9（ ）【 】～！”“；：《》<>=+\-]")#Группа символов, содержащие символы в скобках, пропускается
+
 def text_tokenizer(txt):
     """Разбирает на отдельные иеролифы(символы) или их возможные сочетания(состоящие из 1 до n-1 символов)"""
     txt=txt.decode()
-    re_pass=re.compile(u"[ 。.]")#Пропускаемые слова
     maxn=15#Макс.длина слова
     n=len(txt)#Длина текста
     l=n if n<maxn else maxn
-    slovlist={}#Словарь со словами в ключах и списком координат в тексте
+    slovlist={}#Словарь со словами в ключах и списком координат в тексте (диапазона)
     for i in range(1,l+1):
         for j in range(i):
             for x in re.finditer(r".{%d}"%(i),txt[j:]):
                 key=x.group(0)
+                if re_pass.search(key)!=None:continue
                 value=[(x.start()+j,x.end()+j)]
                 if key in slovlist:
                     slovlist[key].extend(value)
@@ -119,34 +121,81 @@ def text_tokenizer(txt):
                     slovlist[key]=value
     return slovlist
 
+from gluon.storage import Storage#Аналог словаря, ведет как словарь, ключи являются атрибутами, но не вызывает исключения при отсутсвии ключа, а просто выдает None
+from itertools import takewhile
+
 def test(text):
-    text=unicode(text, 'utf-8')#Декодируем строку на всякий случай
+    #text=unicode(text, 'utf-8')#Декодируем строку на всякий случай
     db=current.db
     slovar=current.slovar
+    #Пробуем найти всю строку
+    row=db(slovar.slovo==text).select().first()
+    if row!=None:
+        zagotovka=[
+            Storage(
+                slovo=unicode(row.slovo, 'utf-8'),
+                pinyin=row.pinyin,
+                perevod=row.perevod,
+                start=0,
+                end=len(unicode(row.slovo, 'utf-8')),
+                dlina=len(unicode(row.slovo, 'utf-8'))
+            )
+        ]
+        return zagotovka
+    #Если не найдено до переходим к пословному поиску
     slovlist=text_tokenizer(text)
-    
-    
-    rez=db(slovar.slovo==text).select().first()#Пробуем найти всю строку
-    if rez!=None:
-        rez=[[rez.slovo,rez.pinyin,rez.perevod,1]]
-        return rez
-    #Словарь с ключами из слов и значениями из списка пиньин перевод
-    rez={unicode(y.slovo, 'utf-8'):[y.pinyin,y.perevod]
-         for y in [db(slovar.slovo==sl).select().first()
-                   for sl in text_tokenizer(text)] if y!=None}
-
-    z={i:[x for x in rez.keys() if text[i:i+len(x)]==x] for i in range(len(text))}
-
-    for i in z.keys():
-        z[i].sort(key=len,reverse=True)
-        if z[i]!=[]:
-            z[i]=z[i][0]
+    return slovlist
+    zagotovka=[]
+    #Список словарей с ключами из слов, пиньин, перевода и позиции в исходном тексте
+    for key,positions in slovlist.items():
+        y=db(slovar.slovo==key).select().first()
+        if y==None:continue
+        for start,end in positions:
+            zagotovka.append(
+                Storage(
+                    slovo=unicode(y.slovo, 'utf-8'),
+                    pinyin=y.pinyin,
+                    perevod=y.perevod,
+                    start=start,
+                    end=end,
+                    dlina=end-start
+                )
+            )
+    #сортируем по начальной позиции
+    zagotovka.sort(key=lambda x:x.start)
+    #Сгруппируем по позиции начала слова и создадим словарь, ключи-стартовая позиция, значения-список начинающихся с этой позиции слов
+    zagotovka={i:list(takewhile(lambda x:x.start==i,zagotovka)) for i in range(len(text))}
+    #Оставим в списке только длинные слова,пустые списки заменим объектом Storage без перевода и пиньина
+    for i in zagotovka.keys():
+        zagotovka[i].sort(key=lambda x:x.dlina,reverse=True)
+        if zagotovka[i]!=[]:
+            zagotovka[i]=zagotovka[i][0]
         else:
-            z[i]=text[i]
-
-    nabor={i:"|"+"|".join(str(x) for x in range(i,i+len(z[i])))+"|" for i in z.keys()}
-    for i,x in nabor.items():
-        for j,y in nabor.items():
-            if y in x and y!=x: z[j]=""
-
-    rez=[[slovo,rez.get(slovo,["",""])[0],rez.get(slovo,["",""])[1],i] for i,slovo in z.items() if slovo!=""]
+            zagotovka[i]=Storage(slovo=text[i],start=i,end=i+1,dlina=1)
+    #Формируем список ключей на удаление
+    paskey=[]
+    for i in zagotovka.keys():
+        for x in zagotovka.values():
+            if i in range(x.start,x.end) and not i in paskey: paskey.append(i)
+    #Удаляем ключи
+    for i in paskey:
+        del zagotovka[i]
+    #Идущие сподряд элементы без перевода объединяем в один элемент
+    #Для этого получаем и сортируем список индексов слов
+    keylist=list(zagotovka.keys())
+    keylist.sort()
+    #формируем список из индексов для слов без перевода и разделителя "|" для остальных и сцепляем в строчную переменную с разделителем ","
+    truelist=",".join([str(x) if str(zagotovka[x].perevod==None) else "|" for x in keylist])
+    #Расцепляем строку обратно в список по разделителю "|" с фильтрацией по ""
+    truelist=filter(lambda x:x==None,truelist.split("|"))
+    #Каждый элемент списка расцепляем в список по разделителю "," с фильтрацией по "" и преобразованием в целое каждого элемента подсписка
+    truelist=[[int(y) for y in filter(lambda z:z==None,x.split(","))] for x in truelist]
+    #Объединяем, записываем в первый ключ и удаляем устальные ключи слов без перевода
+    for x in truelist:
+        key=x.pop(0)
+        for y in x:
+            zagotovka[key].slovo+=zagotovka[y].slovo
+            del zagotovka[y]
+    zagotovka=list(zagotovka.values())
+    zagotovka.sort(key=lambda x:x.start)
+    return zagotovka

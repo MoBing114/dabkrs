@@ -33,7 +33,7 @@ response.menu = [
     ("Мастерская", False, URL('bkrsmaster', 'index'), []),
 ]
 
-DEVELOPMENT_MENU = False
+DEVELOPMENT_MENU = True
 
 
 # ----------------------------------------------------------------------------------------------------------------------
