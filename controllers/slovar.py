@@ -30,3 +30,4 @@ def otvet():
             _class="slovo",
             _position=str(x.start)+"-"+str(x.end),
             _slovo=x.slovo) for x in rez])
+ #闭式循环水膨胀水箱液位不低并且闭式循环水泵A温度正常
