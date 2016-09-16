@@ -1,29 +1,37 @@
-.iskomyi-text{font-size:16pt;text-align:center;}
-.shkatulka-slov{}
-.slovo:not(:only-of-type){
+.web2py_console #w2p_keywords {width: 80%;}
+.iskomyi-text{font-size:3vmin;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
+/*.slovo:not(:only-of-type){
     display:inline-block;
-    width: 24%;
-    height: 200px;
+    max-width: 24%;
+    height: 250px;
     line-height: normal;
     vertical-align: top;
     margin-bottom: 10px;
-    /*background: #E76D13;*/
+    overflow: hidden;
+    text-overflow:ellipsis;
+}*/
+.txt-label{font-size:3vmin;}
+.l-sctn,.r-sctn{color:red}
+.slovo{
+    display:inline-block;
+    height: 250px;
+    line-height: normal;
+    vertical-align: top;
     overflow: hidden;
     text-overflow:ellipsis;
 }
-.slovo{height: auto;width:auto;}
-.slovo:hover {
-    height: auto;
-    overflow: show;
-}
-.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt;text-align: center;}
-.py {font-size:12pt;text-align: center;}
-/*.ru{max-height:200px;position:relative;background:#fff;border:1px solid #D8DFEA;float:left;overflow: auto;}*/
-.highlight {background-color: yellow}
-.m1{margin-left:0.5em;font-size:12pt;font:bold}
-.m2{margin-left:1em}
-.m3{margin-left:1.5em}
-.m4{margin-left:2em}
+.slovo:hover{height:auto;overflow:show;}
+.bywords td{vertical-align:top;}
+.bywords tr{vertical-align:top;}
+a:hover{color:green}
+.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:3vmin;text-align: center;}
+.py{font-family:STSong, STKaiti, sans-serif, arial;font-size:3vmin;font-weight:bold;}
+.ru{font-family:arial;font-size:3vmin;}
+.highlight {background-color: yellow;}
+.m1{margin-left:5%;font-size:3vmin;font:bold;}
+.m2{margin-left:10%;font-size:3vmin;}
+.m3{margin-left:15%;font-size:2.8vmin;}
+.m4{margin-left:20%;font-size:2.5vmin;}
 .green {color:green}
 .ex {color:#666666}
 .maroon {color:maroon}
@@ -35,23 +43,3 @@
 .brown {color:brown}
 .crimson {color:crimson}
 .bold {font-weight:bold}
-.pt8 {font-size:8pt}
-.pt9 {font-size:9pt}
-.pt10 {font-size:10pt}
-.pt11 {font-size:11pt}
-.pt12 {font-size:12pt}
-.pt13 {font-size:13pt}
-.pt14 {font-size:14pt}
-.pt16 {font-size:16pt}
-.pt18 {font-size:18pt}
-.pt20 {font-size:20pt}
-.pr25 {width:25%;}
-.vtop {vertical-align:top}
-.margin_left {margin:0 50px}
-a:hover.black {color:black}
-.img-middle {vertical-align:middle}
-.foat_left {float:left}
-.foat_right {float:right}
-.hidden {display:none}
-.pointer {cursor:pointer}
-.arial {font-family:arial}

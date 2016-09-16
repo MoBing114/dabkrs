@@ -13,7 +13,7 @@ reg_b=re.compile(r"\[b\](.*?)\[/b\]")#B()
 reg_p=re.compile(r"\[p\](.*?)\[/p\]")#I()
 reg_skobki=re.compile(r"(\(.*?\))")#SPAN()
 reg_numerate=re.compile(r"([^\d])(\d{1,2})[).]")#SPAN()
-reg_alfavite=re.compile(u"([^a-zа-я]+[abcdeабвгд])\)")#SPAN()
+reg_alfavite=re.compile(u"([^a-zа-я]+)([abcdeабвгд])\)")#SPAN()
 reg_m=re.compile(r"\[m([1-4])\](.*?)\[/m\]")#DIV()
 reg_e=re.compile(r"\[e\](.*?)\[/e\]")#DIV()
 reg_ex=re.compile(r"\[ex\](.*?)\[/ex\]")#DIV()
@@ -22,7 +22,7 @@ reg_mi=re.compile(r"(\[m[1-4]\])")
 
 def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки]) синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
-    perevod=unicode(text, 'utf-8')
+    if not isinstance(text,unicode):perevod=unicode(text, 'utf-8')
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
     perevod=perevod.replace("([i]","[i](")
     perevod=perevod.replace("[/i])",")[/i]")
@@ -51,7 +51,7 @@ def repres_perevod(perevod,*args):
     #Текст может содержать тэги ссылок, создадим ссылку на действие контроллера slovo для обработки нажатия этих ссылок
     link=URL("slovo")
     perevod=reg_ref.sub(r"<a href='%s\?slovo=\1' slovo='\1'>\1</a>"%link,perevod)#Заменяем тэги ссылок [ref] на html тэги
-    perevod=reg_alfavite.sub(r"<span'>\1.</span>",perevod)#Выделяем буквенное перечисление
+    perevod=reg_alfavite.sub(r"\1<span'>\2.</span>",perevod)#Выделяем буквенное перечисление
     perevod=reg_numerate.sub(r"\1<span'>\2.</span>",perevod)#Выделяем нумерованное перечисление
     perevod=reg_c.sub(r"<span>\1</span>",perevod)#Заменяем тэги выделения на html тэги
     for color,reg_ccolor in reg_ccolors.items():
@@ -80,7 +80,7 @@ def split_perevod(div,slovo):
 def sokr_perevod(perevod,slovo,*args):
     """Функция очищает, сокращает html представление словарной статьи путем замены соответствующих тэгов"""
     tagObj=repres_perevod(perevod)#Возвращает уже объект класса TAG, а не текст
-    #slovo=unicode(slovo, 'utf-8')#В юникод сразу, чтобы не было проблем
+    if not isinstance(slovo,unicode):slovo=unicode(slovo, 'utf-8')
     perevod_po_silke=[]
     for ref in tagObj.elements('a'):
         ref_perevod=current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod).first()
@@ -96,7 +96,7 @@ def sokr_perevod(perevod,slovo,*args):
     tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: split_perevod(div,slovo))#Непустые блоки преобразуем в элементы списка
     values=[]
     for value in [x.flatten().strip() for x in tagObj.elements('li')]:
-        if not value in values: values.append(value)
+        if not value in values and re.search(u"[一-龥]",unicode(value, 'utf-8'),re.U)==None: values.append(value)
     tagObj=UL(values)
     return tagObj
 
@@ -130,50 +130,50 @@ def reshala(text):
     if not isinstance(text,unicode):text=unicode(text, 'utf-8') #Преобразуем строку типа str в тип unicode 'utf-8'
     db=current.db
     slovar=current.slovar
-    #Пробуем найти всю строку
-    row=db(slovar.slovo==text).select().first()
-    if row!=None:
-        bolvanka=[
-            Storage(
-                slovo=unicode(row.slovo, 'utf-8'),
-                pinyin=row.pinyin,
-                perevod=row.perevod,
-                start=0,
-                end=len(unicode(row.slovo, 'utf-8')),
-                dlina=len(unicode(row.slovo, 'utf-8'))
-            )
-        ]
-        return bolvanka
-    #Если не найдено до переходим к пословному поиску
+    n=len(text)#Длина текста, пригодится еще
+    #Объект исходного текста, добавим его в начало списка перед выводом
+    ishodnik=Storage(slovo=text,pinyin="",perevod="",start=0,end=n,dlina=n,childs=[])
     #Словарь из комбинаций иероглифов в ключах и позициями данной комбинации в значениях (кортеж)
     slovdict=text_tokenizer(text)
+    #Пробуем найти весь текст
+    row=db(slovar.slovo==text).select().first()
+    if row!=None:
+            ishodnik.pinyin=row.pinyin,
+            ishodnik.perevod=row.perevod
+            slovdict.pop(text)
+    #Переходим к пословному поиску
     #Заготовка в виде экземпляра Storage, ключ - позиция первого символа слова в тексте, значение - объект представления слова (экз. Storage)
     bolvanka=Storage()
     for key,positions in slovdict.items():
         #Запрашиваем в базе
-        y=db(slovar.slovo==key).select().first()
-        if y==None:continue#Если нет, то берем следущее слово
+        row=db(slovar.slovo==key).select().first()
+        if row==None:continue#Если нет, то берем следущее слово
         #Слово есть в базе, но оно может несколько раз встречаться в тексте, поэтому пройдемся по этим местам
         for start,end in positions:
-            #Подготовим объект, представляющий слово (со всем содержимым экземпляра Row в переменной y, плюс атрибуты позиций и длина)
+            #Подготовим объект, представляющий слово (со всем содержимым экземпляра Row в переменной row, плюс атрибуты позиций и длина)
             value=Storage(
-                    slovo=y.slovo,
-                    pinyin=y.pinyin,
-                    perevod=y.perevod,
+                    slovo=unicode(row.slovo,'utf-8'),
+                    pinyin=row.pinyin,
+                    perevod=row.perevod,
                     start=start,
                     end=end,
-                    dlina=end-start
+                    dlina=end-start,
+                    childs=[]
                 )
             #Если данная позиция не занята, то заполняем
             if bolvanka[start]==None:
                 bolvanka[start]=value
-            #Если занята, то заполняем самым длинным словом
+            #Если занята, то заполняем самым длинным словом, старое тащим к детям
             elif value.dlina>bolvanka[start].dlina:
+                value.childs.extend(bolvanka[start].childs)
+                bolvanka[start].childs=[]
+                value.childs.append(bolvanka.pop(start))
                 bolvanka[start]=value
+            else:
+                bolvanka[start].childs.append(value)
     #Если в базе вообще ничего не найдено, то возвращаем пустой список
-    if bolvanka[0]==None:return []
+    if bolvanka[0]==None:return [ishodnik]
     #Заполним заготовку объектами, представляющими символы текста, которые не найдены
-    n=len(text)
     for i in range(n):
         if i not in bolvanka:
             bolvanka[i]=Storage(
@@ -182,35 +182,74 @@ def reshala(text):
                 perevod=None,
                 start=i,
                 end=i+1,
-                dlina=1
+                dlina=1,
+                childs=[]
             )
     #Помечаем первый символ группы непрерывной последовательности символом без перевода атрибутом .perevod="",
     #а всю последовательность символов в группе переносим в первый символ
-    i=0
-    while i<n:
-        if bolvanka[i].perevod==None and i==0:
-            start=0
-        #Условие границы группы символов - если для текущего слова нет перевода, а для предыдущего есть, то запоминаем позицию в start
-        elif bolvanka[i].perevod==None and bolvanka[i-1].perevod!=None:
-            start=i
-        #Если для текущего и предыдущего нет перевода, то выставляем для стартового ключа .perevod="", к .slovo прибавляем текущее, для остальных - приращение на 1
-        elif bolvanka[i].perevod==None:
-            bolvanka[start].slovo+=bolvanka[i].slovo
-            bolvanka[start].perevod=""
+    for x in re.finditer("1+","".join(['1' if val.perevod==None else '0' for val in bolvanka.values()])):
+        start=x.start()
+        bolvanka[start].perevod=""
+        for key in range(x.start()+1,x.end()):
+            bolvanka[start].slovo+=bolvanka[key].slovo
             bolvanka[start].end+=1
             bolvanka[start].dlina+=1
-        i+=1
-    #Вспомогательный словарь из ключей заготовки и значениями в формате "|0|1|2|...|", где цифры - раскрытый диапазон позиций слова
-    nabor={i:"|"+"|".join(str(x) for x in range(i,bolvanka[i].end))+"|" for i in bolvanka.keys()}
-    #Найдем ключи с вложенными диапазонами, отметим для них в заготовке .perevod=None (для удаления вложенных переводов слова)
-    for x in nabor.values():
-        for key,y in nabor.items():
-            if y in x and y!=x: bolvanka[key].perevod=None
+    #Найдем ключи с вложенными диапазонами
+    #Вспомогательный словарь из множеств - раскрытых диапазонов позиций символов слова
+    nabor={i:set(range(i,bolvanka[i].end)) for i in bolvanka.keys()}
+    for pkey,x in nabor.items():
+        if bolvanka[pkey]==None:continue
+        for ckey,y in nabor.items():
+            if bolvanka[ckey]==None:continue
+            if y < x and bolvanka[ckey].perevod!=None:
+                bolvanka[pkey].childs.extend(bolvanka[ckey].childs)
+                bolvanka[ckey].childs=[]
+                bolvanka[pkey].childs.append(bolvanka.pop(ckey))
     #Удаляем ключи с .perevod==None
     for key,value in bolvanka.items():
         if value.perevod==None:
             del bolvanka[key]
-    #Преобразуем в список, сортируем и отправляем результат
+
+    #Преобразуем в список, сортируем
     bolvanka=list(bolvanka.values())
     bolvanka.sort(key=lambda x:x.start)
+    #Найдем иероглифы на стыке
+    for i in xrange(len(bolvanka)-1):
+        a=bolvanka[i]
+        b=bolvanka[i+1]
+        ar=set(range(a.start,a.end))
+        br=set(range(b.start,b.end))
+        ab=list(ar&br)
+        ab.sort()
+        ar=list(ar)
+        br=list(br)
+        ar.sort()
+        br.sort()
+        if ab!=[]:
+            aa,bb= ab[0]-ar[-1]-1,ab[-1]-br[0]+1
+            a.rspan=aa#Отриц.число, обозначает сколько символов с конца имеются в следующем слове slovo[rspan:]
+            b.lspan=bb#Полож.число, обозначает сколько символов с начала имеются в предыдущим слове slovo[:lspan]
+
+    bolvanka.insert(0,ishodnik)
     return bolvanka
+
+def splitby(spisok,ngroup):
+    """Разбивает список на подсписки из заданного числа элементов"""
+    newspisok=[]
+    i=1
+    x=[]
+    while spisok!=[]:
+        if i>ngroup:
+            newspisok.append(x)
+            x=[]
+            i=1
+        x.append(spisok.pop(0))
+        i+=1
+        if spisok==[]:newspisok.append(x)
+    return newspisok
+
+def slovintersection(x):
+    l=SPAN(x.slovo[:x.lspan],_class="l-sctn") if x.lspan!=None else ""
+    r=SPAN(x.slovo[x.rspan:],_class="r-sctn") if x.rspan!=None else ""
+    m=SPAN(x.slovo[x.lspan:x.rspan],_class="m-sctn") if x.rspan!=None or x.lspan!=None else SPAN(x.slovo,_class="m-sctn")
+    return CAT(l,m,r)
