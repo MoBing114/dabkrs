@@ -58,4 +58,13 @@ def call():
     """
     return service()
 
-
+def testtable():
+    import json
+    # Select all the records, to show how
+    # datatables.net paginates.
+    # Rows can't be serialized because they contain a reference to
+    # an open database connection. Use as_list()
+    # to serialize the query result.
+    jslovar = json.dumps(db(slovar.id<5000).select(slovar.slovo,slovar.pinyin,slovar.perevod).as_list())
+    # Convert to XML for DataTable
+    return dict(results=XML(jslovar))

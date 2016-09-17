@@ -1,5 +1,5 @@
 .web2py_console #w2p_keywords {width: 80%;}
-.iskomyi-text{font-size:3vmin;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
+.iskomyi-text{font-size:2vmin;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
 /*.slovo:not(:only-of-type){
     display:inline-block;
     max-width: 24%;
@@ -10,8 +10,9 @@
     overflow: hidden;
     text-overflow:ellipsis;
 }*/
-.txt-label{font-size:3vmin;}
+.txt-label{font-size:2vmin;}
 .l-sctn,.r-sctn{color:red}
+
 .slovo{
     display:inline-block;
     height: 250px;
@@ -24,14 +25,14 @@
 .bywords td{vertical-align:top;}
 .bywords tr{vertical-align:top;}
 a:hover{color:green}
-.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:3vmin;text-align: center;}
-.py{font-family:STSong, STKaiti, sans-serif, arial;font-size:3vmin;font-weight:bold;}
-.ru{font-family:arial;font-size:3vmin;}
+.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:2vmin;text-align: center;}
+.py{font-family:STSong, STKaiti, sans-serif, arial;font-size:2vmin;font-weight:bold;}
+.ru{font-family:arial;font-size:2vmin;}
 .highlight {background-color: yellow;}
-.m1{margin-left:5%;font-size:3vmin;font:bold;}
-.m2{margin-left:10%;font-size:3vmin;}
-.m3{margin-left:15%;font-size:2.8vmin;}
-.m4{margin-left:20%;font-size:2.5vmin;}
+.m1{margin-left:5%;font-size:2vmin;font:bold;}
+.m2{margin-left:10%;font-size:2vmin;}
+.m3{margin-left:15%;font-size:1.8vmin;}
+.m4{margin-left:20%;font-size:1.5vmin;}
 .green {color:green}
 .ex {color:#666666}
 .maroon {color:maroon}

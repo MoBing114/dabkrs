@@ -172,7 +172,7 @@ def reshala(text):
             else:
                 bolvanka[start].childs.append(value)
     #Если в базе вообще ничего не найдено, то возвращаем пустой список
-    if bolvanka[0]==None:return [ishodnik]
+    if bolvanka.keys()==[]:return [ishodnik]
     #Заполним заготовку объектами, представляющими символы текста, которые не найдены
     for i in range(n):
         if i not in bolvanka:
@@ -247,9 +247,3 @@ def splitby(spisok,ngroup):
         i+=1
         if spisok==[]:newspisok.append(x)
     return newspisok
-
-def slovintersection(x):
-    l=SPAN(x.slovo[:x.lspan],_class="l-sctn") if x.lspan!=None else ""
-    r=SPAN(x.slovo[x.rspan:],_class="r-sctn") if x.rspan!=None else ""
-    m=SPAN(x.slovo[x.lspan:x.rspan],_class="m-sctn") if x.rspan!=None or x.lspan!=None else SPAN(x.slovo,_class="m-sctn")
-    return CAT(l,m,r)

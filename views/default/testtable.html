@@ -1,0 +1,33 @@
+{{response.files.extend([
+URL('static','js/jquery.dataTables.min.js'),
+URL('static','js/dataTables.bootstrap.min.js'),
+URL('static','css/dataTables.bootstrap.min.css'),
+])
+}}
+{{extend 'layout.html'}}
+{{if 'message' in globals():}}
+<h3>{{=message}}</h3>
+{{pass}}
+<table id="person-table" class="table table-bordered table-striped" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+            <th>slovo</th>
+            <th>pinyin</th>
+            <th>perevod</th>
+        </tr>
+    </thead>
+</table>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#person-table").DataTable({
+        data:  {{=results}},
+        columns: [
+            { data: 'slovo' },
+            { data: 'pinyin' },
+            { data: 'perevod' }
+            // 'id' omitted to show that you can
+            // use only the fields you choose
+        ]
+    })
+});
+</script>

@@ -2,7 +2,7 @@
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-from bkrstools import text_tokenizer,repres_perevod,sokr_perevod,reshala,splitby,slovintersection
+from bkrstools import text_tokenizer,repres_perevod,sokr_perevod,reshala,splitby
 
 def index():
     """Действие по умолчанию, показывает таблицу словарной базы данных"""
@@ -13,6 +13,12 @@ def index():
     )
     return dict(form=form)
 
+def slovintersection(x):
+    return CAT(SPAN(x.slovo[:x.lspan],_class="l-sctn") if x.lspan!=None else "",
+               SPAN(x.slovo[x.lspan:x.rspan],_class="m-sctn") if x.rspan!=None or x.lspan!=None else SPAN(x.slovo,_class="m-sctn"),
+               SPAN(x.slovo[x.rspan:],_class="r-sctn") if x.rspan!=None else "")
+
+@cache.action(cache_model=cache.ram)
 def slovo():
     #response.js ="jQuery('.slovo').on('mouseenter', function() {        jQuery('.iskomyi-text').unhighlight();        var v = jQuery(this).attr('slovo');        if (v!='') jQuery('.iskomyi-text').highlight(v);    });    jQuery('.slovo').on('mouseleave', function() {        jQuery('.iskomyi-text').unhighlight();    });"
     return dict(ajaxotvet=otvet())
@@ -38,5 +44,5 @@ def otvet():
             _class="slovo",
             _position=str(x.start)+"-"+str(x.end),
             _slovo=x.slovo) for x in rez]
-    bywords=TABLE(splitby(bywords,4),_class="bywords")
+    bywords=TABLE(splitby(bywords,5),_class="bywords")
     return CAT(DIV("Словарный:",_class="txt-label"),first,DIV("Пословный:",_class="txt-label"),bywords)
