@@ -18,7 +18,7 @@ def slovintersection(x):
                SPAN(x.slovo[x.lspan:x.rspan],_class="m-sctn") if x.rspan!=None or x.lspan!=None else SPAN(x.slovo,_class="m-sctn"),
                SPAN(x.slovo[x.rspan:],_class="r-sctn") if x.rspan!=None else "")
 
-#@cache.action(cache_model=cache.ram)
+@cache.action(cache_model=cache.ram)
 def slovo():
     #response.js ="jQuery('.slovo').on('mouseenter', function() {        jQuery('.iskomyi-text').unhighlight();        var v = jQuery(this).attr('slovo');        if (v!='') jQuery('.iskomyi-text').highlight(v);    });    jQuery('.slovo').on('mouseleave', function() {        jQuery('.iskomyi-text').unhighlight();    });"
     return dict(ajaxotvet=otvet())
