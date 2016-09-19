@@ -22,8 +22,8 @@
     text-overflow:ellipsis;
 }
 .slovo:hover{height:auto;overflow:show;}
-.bywords td{vertical-align:top;}
-.bywords tr{vertical-align:top;}
+.byword td{vertical-align:top;}
+.byword tr{vertical-align:top;}
 a:hover{color:green}
 .ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:2vmin;text-align: center;}
 .py{font-family:STSong, STKaiti, sans-serif, arial;font-size:2vmin;font-weight:bold;}

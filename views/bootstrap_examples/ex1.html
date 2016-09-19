@@ -1,0 +1,48 @@
+{{extend 'layout.html'}}
+<style>
+article.accordion {
+  display: block; overflow: auto; width: 663px; margin: 0 auto; 
+}
+article.accordion section {
+  position: relative; display: block; float: left; width: 37px; height: 300px; margin: 3px 0 3px 3px;
+  color: #337AB7; background-color: #337AB7; overflow: hidden; border-radius: 3px; border: 1px solid #337AB7; 
+}
+article.accordion section h2 {
+  position: absolute; font-size: 16px; width: 300px; height: 37px; top: 300px; left: 0; text-indent: 1em;
+  padding: 0; margin: 0; color: #fff; -webkit-transform-origin: 0 0; -moz-transform-origin: 0 0; -ms-transform-origin: 0 0; -o-transform-origin: 0 0; transform-origin: 0 0; -webkit-transform: rotate(-90deg); -moz-transform: rotate(-90deg); -ms-transform: rotate(-90deg); -o-transform: rotate(-90deg); transform: rotate(-90deg);
+}
+article.accordion section h2 a {
+  display: block; width: 100%; line-height: 37px; text-decoration: none; color: inherit; outline: 0 none;
+}
+article.accordion section:target {
+  width: 500px; padding: 0 15px; color: #333; background-color: #fff; 
+}
+article.accordion section:target h2 {
+  position: static; font-size: 16px; text-indent: 0; color: #333; -webkit-transform: rotate(0deg);   -moz-transform: rotate(0deg); -ms-transform: rotate(0deg); -o-transform: rotate(0deg); transform: rotate(0deg);
+}
+article.accordion section, article.accordion section h2 {
+  -webkit-transition: all 0.3s ease; -moz-transition: all 0.3s ease; -ms-transition: all 0.3s ease;   -o-transition: all 0.3s ease; transition: all 0.3s ease;
+}
+</style>
+<article class="accordion">
+  <section id="acc1">
+    <h2><a href="#acc1">Раздел 1</a></h2>
+    <p>...</p>
+  </section>
+  <section id="acc2">
+    <h2><a href="#acc2">Раздел 2</a></h2>
+    <p>...</p>
+  </section>
+  <section id="acc3">
+    <h2><a href="#acc3">Раздел 3</a></h2>
+    <p>...</p>
+  </section>
+  <section id="acc4">
+    <h2><a href="#acc4">Раздел 4</a></h2>
+    <p>...</p>
+  </section>
+  <section id="acc5">
+    <h2><a href="#acc5">Раздел 5</a></h2>
+    <p>...</p>
+  </section>
+</article>

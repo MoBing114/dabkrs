@@ -44,6 +44,6 @@ def otvet():
             _class="slovo",
             _position=str(x.start)+"-"+str(x.end),
             _slovo=x.slovo) for x in rez]
-    bywords=TABLE(splitby(bywords,5),_class="bywords")
+    bywords=TABLE(splitby(bywords,5),_class="byword")
     slovlist=DIV(" ".join([x.elements('li')[0].flatten() for x in bywords.elements('div.ru') if x.elements('li')!=[]]),_class="slovlist")
     return CAT(DIV("Словарный:",_class="txt-label"),first,DIV("Пословный:",_class="txt-label"),bywords,DIV("Псевдоперевод:",_class="txt-label"),slovlist)

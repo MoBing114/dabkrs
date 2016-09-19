@@ -1,0 +1,14 @@
+{{extend 'layout.html'}}
+<script type="text/javascript">
+$(document).ready(
+    function(){
+        $('.popover-dismissible').popover({
+            placement : 'bottom'});
+});
+
+</script>
+
+<div href="#" tabindex="0" class="col-md-4 popover-dismissible" role="button" data-toggle="popover" data-trigger="click" title="Заголовок панели" data-content="<a>Текст панели.</a>" data-html='true'>Ссылка с popover</div>
+<a href="#" tabindex="0" class="btn btn-danger popover-dismissible" role="button" data-toggle="popover" data-trigger="focus" title="Заголовок панели" data-content="Текст панели.">Ссылка с popover</a>
+<a href="#" tabindex="0" class="btn btn-primary popover-dismissible" role="button" data-toggle="popover" data-trigger="focus" title="Заголовок панели" data-content="Текст панели.">Ссылка с popover</a>
+<a href="#" tabindex="0" class="btn btn-info popover-dismissible" role="button" data-toggle="popover" data-trigger="focus" title="Заголовок панели" data-content="Текст панели.">Ссылка с popover</a>
