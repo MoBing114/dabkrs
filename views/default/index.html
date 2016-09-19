@@ -1,52 +1,81 @@
-{{left_sidebar_enabled,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
-
-{{block header}}
-    <header class="container-fluid background">
-      <div class="jumbotron text-center">
-        {{if response.title:}}
-        <h1>{{=response.title}}
-          <small>{{=response.subtitle or ''}}</small></h1>
-        {{pass}}
+<!-- Таблица стилей CSS -->
+<style type="text/css">
+h2{
+    margin: 0;     
+    color: #666;
+    padding-top: 90px;
+    font-size: 52px;
+    font-family: "trebuchet ms", sans-serif;    
+}
+.item{
+    background: #333;    
+    text-align: center;
+    height: 300px !important;
+}
+.carousel{
+    margin-top: 20px;
+}
+</style>
+ 
+<!-- Карусель -->
+<div id="myCarousel" class="carousel slide" data-interval="3000" data-ride="carousel">
+  <!-- Индикаторы для карусели -->
+  <ol class="carousel-indicators">
+    <!-- Перейти к 0 слайду карусели с помощью соответствующего индекса data-slide-to="0" -->
+    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+    <!-- Перейти к 1 слайду карусели с помощью соответствующего индекса data-slide-to="1" -->
+    <li data-target="#myCarousel" data-slide-to="1"></li>
+    <!-- Перейти к 2 слайду карусели с помощью соответствующего индекса data-slide-to="2" -->
+    <li data-target="#myCarousel" data-slide-to="2"></li>
+  </ol>   
+  <!-- Слайды карусели -->
+  <div class="carousel-inner">
+    <!-- Слайды создаются с помощью контейнера с классом item, внутри которого помещается содержимое слайда -->
+    <div class="active item">
+      <h2>Слайд №1</h2>
+      <div class="carousel-caption">
+        <h3>Заголовок 1 слайда</h3>
+        <p>Текст (описание) 1 слайда...</p>
       </div>
-    </header>
-{{end}}
-
-{{if 'message' in globals():}}
-<h2>{{=message}}</h2>
-<p class="lead">{{=T('How did you get here?')}}</p>
-<ol>
-  <li>{{=T('You are successfully running web2py')}}</li>
-  <li>{{=XML(T('You visited the url %s', A(request.env.path_info,_href=request.env.path_info)))}}</li>
-  <li>{{=XML(T('Which called the function %s located in the file %s',
-    (A(request.function+'()',_href='#'),
-    A('web2py/applications/%(application)s/controllers/%(controller)s.py' % request,
-    _href=URL('admin','default','peek', args=(request.application,'controllers',request.controller+'.py'))))))}}</li>
-  <li>{{=XML(T('The output of the file is a dictionary that was rendered by the view %s',
-    A('web2py/applications/%(application)s/views/%(controller)s/index.html' % request,
-    _href=URL('admin','default','peek',args=(request.application,'views',request.controller,'index.html')))))}}</li>
-  <li>{{=T('You can modify this application and adapt it to your needs')}}</li>
-</ol>
-{{elif 'content' in globals():}}
-{{=content}}
-{{else:}}
-{{=BEAUTIFY(response._vars)}}
-{{pass}}
-
-{{block right_sidebar}}
-<div class="panel panel-info">
-  <div class="panel-heading"><h3 class="panel-title"><a class="btn-block"
-      href="{{=URL('admin','default','index')}}">
-      <i class="glyphicon glyphicon-cog"></i>
-      {{=T("admin")}}
-    </a></h3></div>
-  <div class="panel-body">
-    {{=T("Don't know what to do?")}}
+    </div>
+    <!-- Слайд №2 -->
+    <div class="item">
+      <h2>Slide 2</h2>
+      <div class="carousel-caption">
+        <h3>Second slide label</h3>
+        <p>Aliquam sit amet gravida nibh, facilisis gravida odio.</p>
+      </div>
+    </div>
+    <!-- Слайд №3 -->
+    <div class="item">
+      <h2>Slide 3</h2>
+      <div class="carousel-caption">
+        <h3>Third slide label</h3>
+        <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+      </div>
+    </div>
   </div>
-  <ul class="list-group">
-    <li class="list-group-item">{{=A(T("Online examples"), _href=URL('examples','default','index'))}}</li>
-    <li class="list-group-item"><a href="http://web2py.com">web2py.com</a></li>
-    <li class="list-group-item"><a href="http://web2py.com/book">{{=T('Documentation')}}</a></li>
-  </ul>
+  <!-- Навигация для карусели -->
+  <!-- Кнопка, осуществляющая переход на предыдущий слайд с помощью атрибута data-slide="prev" -->
+  <a class="carousel-control left" href="#myCarousel" data-slide="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+  </a>
+  <!-- Кнопка, осуществляющая переход на следующий слайд с помощью атрибута data-slide="next" -->
+  <a class="carousel-control right" href="#myCarousel" data-slide="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+  </a>
 </div>
-{{end}}
+<script type="text/javascript">
+$(document).ready(
+    function(){
+        $('.popover-dismissible').popover({
+            placement : 'top'});
+});
+
+</script>
+
+<div href="#" tabindex="0" class="col-md-4 popover-dismissible" role="button" data-toggle="popover" data-trigger="click" title="Заголовок панели" data-content="<a>Текст панели.</a>" data-html='true'>Ссылка с popover</div>
+<a href="#" tabindex="0" class="btn btn-danger popover-dismissible" role="button" data-toggle="popover" data-trigger="focus" title="Заголовок панели" data-content="Текст панели.">Ссылка с popover</a>
+<a href="#" tabindex="0" class="btn btn-primary popover-dismissible" role="button" data-toggle="popover" data-trigger="focus" title="Заголовок панели" data-content="Текст панели.">Ссылка с popover</a>
+<a href="#" tabindex="0" class="btn btn-info popover-dismissible" role="button" data-toggle="popover" data-trigger="focus" title="Заголовок панели" data-content="Текст панели.">Ссылка с popover</a>
