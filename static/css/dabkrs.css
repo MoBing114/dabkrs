@@ -15,14 +15,16 @@
 
 .slovo{
     display:inline-block;
-    height: 250px;
+    height:inherit;
+    width:100%;
     line-height: normal;
     vertical-align: top;
     overflow: hidden;
     text-overflow:ellipsis;
+    background-color:floralwhite;
 }
-.slovo:hover{height:auto;overflow:show;}
-.byword td{vertical-align:top;}
+.slovo:hover{height:auto;overflow:visible;background-color:gainsboro;}
+.byword td{vertical-align:top;width:25%;height:100px;}
 .byword tr{vertical-align:top;}
 a:hover{color:green}
 .ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:2vmin;text-align: center;}

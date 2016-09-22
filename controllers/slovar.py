@@ -14,11 +14,11 @@ def index():
     return dict(form=form)
 
 def slovintersection(x):
-    return CAT(SPAN(x.slovo[:x.lspan],_class="l-sctn") if x.lspan!=None else "",
-               SPAN(x.slovo[x.lspan:x.rspan],_class="m-sctn") if x.rspan!=None or x.lspan!=None else SPAN(x.slovo,_class="m-sctn"),
-               SPAN(x.slovo[x.rspan:],_class="r-sctn") if x.rspan!=None else "")
+    return CAT(SPAN(x.slovo[:x.lspan],_class="text-warning") if x.lspan!=None else "",
+               x.slovo[x.lspan:x.rspan] if x.rspan!=None or x.lspan!=None else x.slovo,
+               SPAN(x.slovo[x.rspan:],_class="text-warning") if x.rspan!=None else "")
 
-@cache.action(cache_model=cache.ram)
+#@cache.action(cache_model=cache.ram)
 def slovo():
     #response.js ="jQuery('.slovo').on('mouseenter', function() {        jQuery('.iskomyi-text').unhighlight();        var v = jQuery(this).attr('slovo');        if (v!='') jQuery('.iskomyi-text').highlight(v);    });    jQuery('.slovo').on('mouseleave', function() {        jQuery('.iskomyi-text').unhighlight();    });"
     return dict(ajaxotvet=otvet())
@@ -44,6 +44,6 @@ def otvet():
             _class="slovo",
             _position=str(x.start)+"-"+str(x.end),
             _slovo=x.slovo) for x in rez]
-    bywords=TABLE(splitby(bywords,5),_class="byword")
+    bywords=TABLE(splitby(bywords,4),_class="byword")
     slovlist=DIV(" ".join([x.elements('li')[0].flatten() for x in bywords.elements('div.ru') if x.elements('li')!=[]]),_class="slovlist")
     return CAT(DIV("Словарный:",_class="txt-label"),first,DIV("Пословный:",_class="txt-label"),bywords,DIV("Псевдоперевод:",_class="txt-label"),slovlist)

@@ -36,13 +36,13 @@ def tasks():
                )
 
 def addtask():
-    taskfunc=reporting_percentages
+    taskfunc=sozdanie_bazy#reporting_percentages
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          task_name=task_name,
-                         pvars=dict(file="static/dsl/dabkrs_160309.dsl",truncate=True),
+                         pvars=dict(file="static/dsl/dabkrs_160922.dsl",truncate=True),
                          timeout=10800,
-                         sync_output=2)
+                         sync_output=3)
     return redirect(URL('tasks'))
 def indexing():
     db.executesql('CREATE INDEX IF NOT EXISTS slovoidx ON slovar (slovo);')
