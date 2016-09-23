@@ -20,7 +20,6 @@ def slovintersection(x):
 
 #@cache.action(cache_model=cache.ram)
 def slovo():
-    #response.js ="jQuery('.slovo').on('mouseenter', function() {        jQuery('.iskomyi-text').unhighlight();        var v = jQuery(this).attr('slovo');        if (v!='') jQuery('.iskomyi-text').highlight(v);    });    jQuery('.slovo').on('mouseleave', function() {        jQuery('.iskomyi-text').unhighlight();    });"
     return dict(ajaxotvet=otvet())
 
 
@@ -28,22 +27,38 @@ def otvet():
     if request.vars.slovo==None:return ""
     if isinstance(request.vars.slovo,list):request.vars.slovo=request.vars.slovo[-1]
     text=unicode(request.vars.slovo, 'utf-8')#Декодируем строку на всякий случай
-    rez=reshala(text)
-    first=rez.pop(0)
+    rez=reshala(text)#Расчленение текста и выдача списка найденных слов в базе
+    first=rez.pop(0)#Первым объектом идет весь текст, и если он есть базе, то появятся соответсвующие атрибуты
+    #Словарный блок
     first=DIV(
-        DIV(first.slovo,_class="ch2"),
+        DIV("Словарный:",_class="txt-label ru"),
+        DIV(first.slovo,_class="hidden",_id="hidekitext"),
+        DIV(first.slovo,_class="ch2",_id="kitext",data={'spy':'affix','offset-top':'50'}),
         DIV(first.pinyin,_class="py"),
         DIV(repres_perevod(first.perevod,first.slovo),_class="ru"),
-        _class="iskomyi-text",
+        _class="iskomyi-text row"
         )
-    proc_func=sokr_perevod
-    bywords=[DIV(A(slovintersection(x),_class="black ch",_href=URL("slovo",vars=dict(slovo=x.slovo))),
-            #DIV(DIV("Дочерние слова:"),*[SPAN(A(y.slovo,_class="black ch",_href=URL("slovo",vars=dict(slovo=y.slovo))),"，") for y in x.childs],_class="childs"),
-            DIV(x.pinyin,_class="py"),
-            DIV(proc_func(x.perevod,x.slovo),_class="ru"),
-            _class="slovo",
-            _position=str(x.start)+"-"+str(x.end),
-            _slovo=x.slovo) for x in rez]
-    bywords=TABLE(splitby(bywords,4),_class="byword")
-    slovlist=DIV(" ".join([x.elements('li')[0].flatten() for x in bywords.elements('div.ru') if x.elements('li')!=[]]),_class="slovlist")
-    return CAT(DIV("Словарный:",_class="txt-label"),first,DIV("Пословный:",_class="txt-label"),bywords,DIV("Псевдоперевод:",_class="txt-label"),slovlist)
+    proc_func=sokr_perevod#Функция обработки статьи перевода
+    #Список пословных блоков
+    bywords=DIV(
+        DIV("Пословный:",_class="txt-label ru"),
+        *[DIV(
+            A(slovintersection(x),_class="black ch",_href=URL("slovo",vars=dict(slovo=x.slovo))),#Найденое слово, после обработки на смежность
+            DIV(x.pinyin,_class="py"),#Пиньин
+            DIV(proc_func(x.perevod,x.slovo),_class="ru"),#Обработанная статья перевода
+            _class="slovo col-md-3 col-sm-4 col-xs-6",#Класс блока
+            _i=str(x.start)+"-"+str(x.end),#расположение слова в тексте
+            _n=str(i),#номер блока(отсчет с нуля)
+            _slovo=x.slovo#само слово
+                )
+             for i,x in enumerate(rez)],
+        _class="row",
+        _id="shkatulka-slov"
+    )
+    #Блок псевдоперевода (экспериментальный), берет только первые слова из списка и сшивает в предложение
+    slovlist=DIV(
+        DIV("Псевдоперевод:",_class="txt-label ru"),
+        " ".join([x.elements('li')[0].flatten() for x in bywords.elements('div.ru') if x.elements('li')!=[]]),
+        _class="slovlist row"
+    )
+    return CAT(first,bywords,slovlist)
