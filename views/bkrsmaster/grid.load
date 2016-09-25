@@ -1,0 +1,11 @@
+{{"""response.files.extend([
+URL('static','js/jquery.js'),
+URL('static','js/web2py.js'),
+URL('static','css/bootstrap.min.css'),
+URL('static','css/web2py-bootstrap3.css'),
+URL('static','js/modernizr-2.8.3.min.js'),
+URL('static','js/bootstrap.min.js'),
+URL('static','js/web2py-bootstrap3.js')
+])
+response.include_files()"""}}
+{{=grid}}

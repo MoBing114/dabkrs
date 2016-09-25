@@ -1,2 +1,10 @@
 {{extend 'layout.html'}}
-{{=form}}
+<a onclick="ajax('{{=URL('bkrsmaster', 'addworker')}}',[],'addworkerstatus')" data-role="start-worker-btn" class="btn btn-default">
+    <i class="glyphicon glyphicon-play-circle">Запустить работника</i></a>
+<a onclick="ajax('{{=URL('bkrsmaster', 'addtask')}}')" class="btn btn-default">
+    <i class="glyphicon glyphicon-play-circle">Запустить тестовую задачу</i></a>
+<div id="addworkerstatus"></div>
+
+{{=LOAD('bkrsmaster','workers',ajax=True,times="infinity",timeout=3000)}}
+{{=LOAD('bkrsmaster','runs',ajax=True,times="infinity",timeout=3000)}}
+{{=LOAD('bkrsmaster','tasks',ajax=True,times="infinity",timeout=3000)}}

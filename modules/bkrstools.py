@@ -49,9 +49,8 @@ def repres_perevod(perevod,*args):
     #Нормализуем словарную статью
     perevod=normalise_perevod(perevod)
     #Текст может содержать тэги ссылок, создадим ссылку на действие контроллера slovo для обработки нажатия этих ссылок
-    #link=URL("slovo")
-    #perevod=reg_ref.sub(r"<a href='%s\?slovo=\1' slovo='\1'>\1</a>"%link,perevod)#Заменяем тэги ссылок [ref] на html тэги
-    perevod=reg_ref.sub(r"<a href='\?slovo=\1' slovo='\1'>\1</a>",perevod)#Заменяем тэги ссылок [ref] на html тэги
+    link=URL(c="slovar",f="slovo")
+    perevod=reg_ref.sub(r"<a href='%s\?slovo=\1' slovo='\1'>\1</a>"%link,perevod)#Заменяем тэги ссылок [ref] на html тэги
     perevod=reg_alfavite.sub(r"\1<span'>\2.</span>",perevod)#Выделяем буквенное перечисление
     perevod=reg_numerate.sub(r"\1<span'>\2.</span>",perevod)#Выделяем нумерованное перечисление
     perevod=reg_c.sub(r"<span>\1</span>",perevod)#Заменяем тэги выделения на html тэги
