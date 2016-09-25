@@ -128,3 +128,10 @@ def indexing():
     db.executesql('CREATE INDEX IF NOT EXISTS pinyinidx ON slovar (pinyin);')
     db.executesql('CREATE INDEX IF NOT EXISTS perevodidx ON slovar (perevod);')
     return "Индексация выполнена"
+
+def start_worker():
+    import subprocess
+    worker = os.path.join(request.env.web2py_path,'web2py.py')
+    p = subprocess.Popen(['python',worker, '-K', 'dabkrs'])
+    stdout, stderr = p.communicate()
+    return stdout#p.poll()
