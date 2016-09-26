@@ -58,7 +58,7 @@ def otvet():
     #Блок псевдоперевода (экспериментальный), берет только первые слова из списка и сшивает в предложение
     slovlist=DIV(
         DIV("Псевдоперевод:",_class="txt-label ru"),
-        " ".join([x.elements('li')[0].flatten() for x in bywords.elements('div.ru') if x.elements('li')!=[]]),
+        " ".join([x.element('li').flatten() if x.element('li')!=None else x['_slovo'] for x in bywords.elements('div.slovo')]),
         _class="slovlist row"
     )
     return CAT(first,bywords,slovlist)

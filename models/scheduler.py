@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from gluon.scheduler import Scheduler
-from zadachi import reporting_percentages,sozdanie_bazy
+from zadachi import *#Импортируем все здесь, чтобы в других местах просто ссылаться по имени
 import os
 #web2py -K dabkrs
 schedb=DAL('sqlite://schedb.sqlite')

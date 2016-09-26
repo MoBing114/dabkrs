@@ -11,67 +11,101 @@ web2py.exe -K dabkrs для исполняемого файла windows
 Не забываем про документирование функций (это то что в тройных кавычках, если что),
 первая строка документации будет браться как имя задачи
 """
-#Оператор print почему то не записывает в поле Run Output запущеной задачи, если кодировка отличается от системной
-#например если сделать импорт
-#from __future__ import unicode_literals
-#или выставить utf-8 по умолчанию при помощи
-#import sys
-#reload(sys)
-#sys.setdefaultencoding("utf-8")
-#то print выводить будет только на консоль, а в поле Run Output не будет.
-#Для открытия файла в "utf-8" или другой кодировке, отличной от системной
-#импортируем функцию с именем, аналогичным встроеной в питон
-#(в питон 3.х open работает как и codecs.open, поэтому codecs не нужен)
-from codecs import open
 from gluon import *
-import re,os,time
+import re,os,time,sys,chardet
+
+def convertfile(filePath):
+    """Пересохранение файла в кодировке "utf-8", если она отличается"""
+    #Файл может быть большим, определим кодировку по первой строке
+    with open(filePath, "rb") as F:
+        text = F.readline()
+        enc = chardet.detect(text).get("encoding")
+        F.close()
+    if enc and enc.lower() != "utf-8":
+        #Если кодировка нужна, то открываем файл и читаем текст
+        with open(filePath, "rb") as F:
+            text=F.read()
+            F.close()
+        #Декодируем и энкодируем в нужную кодировку
+        text = text.decode(enc)
+        text = text.encode("utf-8")
+        with open(filePath, "wb") as f:#Перезаписываем файл
+            f.write(text)
+            f.close()
 
 def reporting_percentages(*args,**vars):
     """Тестовая функция"""
     for i in range(10):
         time.sleep(5)
-        print u'!clear!%d'%(i)
-    return 1
+        msg='!clear! готово %d'%(i)
+        print msg
+    return "задача выполнена"
 
 def sozdanie_bazy(file,truncate=False):
     """Заполнение базы из файла словаря в формате DSL.
     Функция открывает текстовый файл словаря в формате DSL (lingvo),
     читает и разбирает по блокам при помощи регулярных выражений,
     находит "слово, пиньин и перевод" и записывает в базу данных в юникод кодировке"""
-    dsl_pattern=re.compile("(?m)^\n([^ ].*?)\n (.*?)\n (.*?)$")
     if not os.path.exists(file): file=os.path.normpath(os.path.join(current.request.folder,file))
-    if not os.path.exists(file): return "File not found"
+    if not os.path.exists(file): return "Файл не найден"
+    dsl_pattern=re.compile(r"(?m)^\n([^ ].*?)\n (.*?)\n (.*?)$")
+    convertfile(file)#Пересохраняем в utf-8
     slovar=current.slovar
     db=current.db
-    if truncate:slovar.truncate()
-    with open(file,mode='r', encoding='utf-8') as f:
-        #Общее число строк в файле для процентов
-        n=len(f.readlines())
-        time.sleep(5)
-        f.close()
+    n=sum(1 for i in open(file, 'r'))#Общее число строк в файле для подсчета процентов
     rezult=[]
-    with open(file,mode='r', encoding='utf-8') as f:
-        i,j=0,0
+    with open(file,mode='r') as f:
+        if truncate:slovar.truncate()#Опустошаем таблицу базы данных, если надо
+        i,j=0,0#Счетчик строк и записей
         #файл большой, поэтому читаем его блоками по 10000 строк
         nbl=10000
-        block=[unicode(f.readline())]
+        block=[f.readline()]
         while block[-1]:
             block=[block[-1]]
-            [block.append(unicode(f.readline())) for ii in range(nbl)]
+            [block.append(f.readline()) for ii in range(nbl)]
             i+=nbl
             #блок должен заканчиваться на строке "\n" либо на символе конца файла, проверяем и читаем дальше, пока не найдем эту строку
             while block[-1]!="\n" and block[-1]!="":
-                block.append(unicode(f.readline()))
+                block.append(f.readline())
+                i+=1
+                #print '!clear!{0:d}'.format(i)
+            #Приступаем к поиску слов в блоке текста и вставке в базу
             for slovo,pinyin,perevod in dsl_pattern.findall("".join(block)):
                 try:
                     slovar.insert(slovo=slovo,pinyin=pinyin,perevod=perevod)
                     j+=1
                 except:
-                    rezult+=u"insert error: "+slovo+u"||"+perevod
-            if j%10000==0:db.commit()
-            time.sleep(2)
-            print u'!clear!{0:d} {1:.2%}'.format(j,float(i)/n)
+                    rezult.append(u"Ошибка вставки слова: "+slovo+u"||"+perevod)
+            if j%10000==0:db.commit()#Фиксируем каждые 10000 вставок
+            print '!clear!Добавлено {0:d} слов, готовность словаря {1:.2%}'.format(j,float(i)/n)#!clear! спецкоманда работнику для очистки вывода
         f.close()
         db.commit()
-        rezult+=u"Insert comlited, added %d records"%(j)
-        return u"\n".join(rezult)
+        rezult.append(u"Вставка завершена, добавлено %d записей"%(j))
+        return "\n".join(rezult)
+
+def createlinks():
+    """Создание ссылок между записями словарных статей"""
+    slovar=current.slovar
+    db=current.db
+    reg_ref=re.compile(r"\[ref\](.*?)\[/ref\]")
+    i,j=0,0
+    n=db(slovar.id>0).count()
+    for x in db(slovar.id>0).iterselect():
+        for slovlnk in reg_ref.findall(x.perevod):
+            row=db(slovar.slovo==slovlnk).select().first()
+            if row!=None:
+                tolist=x.linksto if x.linksto!=None else []
+                if row.id not in tolist:
+                    tolist.append(row.id)
+                    x.update_record(linksto=tolist)
+
+                fromlist=row.linksfrom if row.linksfrom!=None else []
+                if x.id not in fromlist:
+                    fromlist.append(x.id)
+                    row.update_record(linksfrom=fromlist)
+                j+=1
+        i+=1
+        if j%1000==0:db.commit()#Фиксируем каждые 1000 вставок
+        print '!clear!Ссылок найдено {0:d}. Готовность {1:.2%}'.format(j,float(i)/n)
+    db.commit()
+    return "Выполнено"

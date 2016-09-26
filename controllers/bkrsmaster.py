@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-
+import sys
 def index():
     return dict()
 
@@ -33,11 +33,11 @@ def tasks():
         )
     )
 def runs():
-    schedb.scheduler_run.run_output.represent=lambda value,row:DIV(DIV(value,
-                                                                       _class="progress-bar",
-                                                                       aria=dict(valuenow=value,valuemin="0",valuemax="9"),
-                                                                       _style="width: {0:.0%};".format(int(value if value!=None else 0)/9.0)),
-                                                                   _class="progress progress-striped active")
+    #schedb.scheduler_run.run_output.represent=lambda value,row:DIV(DIV(value,
+                                                                       #_class="progress-bar",
+                                                                       #aria=dict(valuenow=value,valuemin="0",valuemax="9"),
+                                                                       #_style="width: {0:.0%};".format(int(value if value!=None else 0)/9.0)),
+                                                                   #_class="progress progress-striped active")
     response.view='bkrsmaster/grid.load'
     return dict(
         grid=SQLFORM.grid(
@@ -106,23 +106,23 @@ def addworker():
     os.startfile(os.path.join(request.env.web2py_path,'startworker.bat'))
     return "Работник запущен"
 
-def killworkers():
-    scheduler.disable('main')
-    #scheduler.resume('main')
-    #scheduler.terminate('main')
-    #scheduler.kill('main')
-    redirect(URL('workers'))
-
 def addtask():
-    taskfunc=sozdanie_bazy
-    taskfunc=reporting_percentages
+    """taskfunc=sozdanie_bazy
+    #taskfunc=reporting_percentages
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          task_name=task_name,
-                         pvars=dict(file="static/dsl/dabkrs_160922.dsl",truncate=True),
+                         pvars=dict(file="static/dsl/dabkrs_160926.dsl",truncate=True),
+                         timeout=10800,
+                         sync_output=3)"""
+    taskfunc=createlinks
+    task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
+    scheduler.queue_task(taskfunc,
+                         task_name=task_name,
                          timeout=10800,
                          sync_output=3)
-    #return redirect(URL('index'))
+    response.flash="Задача добавлена"
+
 def indexing():
     db.executesql('CREATE INDEX IF NOT EXISTS slovoidx ON slovar (slovo);')
     db.executesql('CREATE INDEX IF NOT EXISTS pinyinidx ON slovar (pinyin);')
@@ -131,7 +131,10 @@ def indexing():
 
 def start_worker():
     import subprocess
-    worker = os.path.join(request.env.web2py_path,'web2py.py')
-    p = subprocess.Popen(['python',worker, '-K', 'dabkrs'])
-    stdout, stderr = p.communicate()
-    return stdout#p.poll()
+    winwworker=os.path.join(request.env.web2py_path,'web2py.exe')
+    pyworker=os.path.join(request.env.web2py_path,'web2py.py')
+    if os.path.isfile(winwworker):
+        p = subprocess.Popen([winwworker, '-K', 'dabkrs'])
+    else:
+        p = subprocess.Popen(['python',pyworker, '-K', 'dabkrs'])
+    if p.poll()==None:response.flash="Работник запущен"

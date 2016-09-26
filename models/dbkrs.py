@@ -7,7 +7,8 @@ slovar = db.define_table('slovar',
                              Field('perevod',"text",label="Перевод"),
                              Field('dlina','integer',compute=lambda row:len(row.slovo),label="Длина"),
                              Field('sostav','list:reference slovar',label="Состав"),
-                             Field('links','list:reference slovar',label="Ссылается"),
+                             Field('linksto','list:reference slovar',label="Ссылается на"),
+                             Field('linksfrom','list:reference slovar',label="Ссылается от"),
                              Field.Virtual('short',lambda row:"",label="Краткая форма"),
                              #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
                              #rname="dabkrs"#если таблица в базе имеет другое реальное имя, то задать реальное имя  (для полей тоже есть rname, на случай миграции с другой БД)
@@ -22,5 +23,6 @@ slovar.sostav.represent=lambda value,row: "" if value==None else DIV(*[#Конт
         A(slovar[x].slovo+", ",#Отображаемое значение
             _href='%(link)s?slovo=%(slovo)s'%dict(link=URL("slovo"), slovo=slovar[x].slovo))#Собственно ссылка
         for x in value])#Цикл по списку id ссылочных полей
-slovar.links.represent=lambda value,row: "" if value==None else DIV(*[repres_perevod(slovar[x].perevod) for x in value])#Получаем html-представление всех помеченных [ref].*[/ref] слов в переводе
+#slovar.linksto.represent=lambda value,row: "" if value==None else DIV(*[repres_perevod(slovar[x].perevod) for x in value])#Получаем html-представление всех помеченных [ref].*[/ref] слов в переводе
+#slovar.linksfrom.represent=lambda value,row: "" if value==None else DIV(*[repres_perevod(slovar[x].perevod) for x in value])#Получаем html-представление всех помеченных [ref].*[/ref] слов в переводе
 slovar.short.represent=lambda value,row: sokr_perevod(row.perevod,row.slovo)#Сокращенная форма перевода (убраны лишние комментарии и примеры)
