@@ -91,21 +91,54 @@ def createlinks():
     i,j=0,0
     n=db(slovar.id>0).count()
     for x in db(slovar.id>0).iterselect():
+        i+=1
         for slovlnk in reg_ref.findall(x.perevod):
             row=db(slovar.slovo==slovlnk).select().first()
-            if row!=None:
-                tolist=x.linksto if x.linksto!=None else []
-                if row.id not in tolist:
-                    tolist.append(row.id)
-                    x.update_record(linksto=tolist)
+            if row==None:continue
 
-                fromlist=row.linksfrom if row.linksfrom!=None else []
-                if x.id not in fromlist:
-                    fromlist.append(x.id)
-                    row.update_record(linksfrom=fromlist)
-                j+=1
-        i+=1
+            tolist=x.linksto if x.linksto!=None else []
+            if row.id not in tolist:
+                tolist.append(row.id)
+                x.update_record(linksto=tolist)
+
+            fromlist=row.linksfrom if row.linksfrom!=None else []
+            if x.id not in fromlist:
+                fromlist.append(x.id)
+                row.update_record(linksfrom=fromlist)
+            j+=1
         if j%1000==0:db.commit()#Фиксируем каждые 1000 вставок
         print '!clear!Ссылок найдено {0:d}. Готовность {1:.2%}'.format(j,float(i)/n)
+    db.commit()
+    return "Выполнено"
+
+def calc_records():
+    """Обновление записей для расчета вычисляемых полей"""
+    slovar=current.slovar
+    db=current.db
+    i=0
+    n=db(slovar.id>0).count()
+    for x in db(slovar.id>0).iterselect():
+        i+=1
+        x.update_record()
+        if i%1000==0:db.commit()#Фиксируем каждые 10000 обновлений
+        print '!clear!Обновление слова id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
+    db.commit()
+    return "Выполнено"
+
+def SostavCreator():
+    """Анализ состава слова"""
+    from bkrstools import reshala
+    slovar=current.slovar
+    db=current.db
+    i=0
+    n=db(slovar.id>0).count()
+    for x in db(slovar.id>0).iterselect():
+        i+=1
+        if x.dlina==1:
+            x.update_record(sostav=[])
+        else:
+            x.update_record(sostav=[y.slovo for j,y in enumerate(reshala(x.slovo)) if j>0])
+        if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
+        print '!clear!Анализ состава слова id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
     db.commit()
     return "Выполнено"

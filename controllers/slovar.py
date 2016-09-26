@@ -24,6 +24,9 @@ def slovo():
 
 
 def otvet():
+    if request.vars.id!=None:
+        sl=slovar(request.vars.id)
+        if sl!=None:request.vars.slovo=sl.slovo
     if request.vars.slovo==None:return ""
     if isinstance(request.vars.slovo,list):request.vars.slovo=request.vars.slovo[-1]
     text=unicode(request.vars.slovo, 'utf-8')#Декодируем строку на всякий случай

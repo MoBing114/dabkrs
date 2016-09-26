@@ -138,9 +138,10 @@ def reshala(text):
     #Пробуем найти весь текст
     row=db(slovar.slovo==text).select().first()
     if row!=None:
-            ishodnik.pinyin=row.pinyin,
+            ishodnik.id=row.id
+            ishodnik.pinyin=row.pinyin
             ishodnik.perevod=row.perevod
-            slovdict.pop(text)
+            if text in slovdict:slovdict.pop(text)
     #Переходим к пословному поиску
     #Заготовка в виде экземпляра Storage, ключ - позиция первого символа слова в тексте, значение - объект представления слова (экз. Storage)
     bolvanka=Storage()
@@ -152,6 +153,7 @@ def reshala(text):
         for start,end in positions:
             #Подготовим объект, представляющий слово (со всем содержимым экземпляра Row в переменной row, плюс атрибуты позиций и длина)
             value=Storage(
+                    id=row.id,
                     slovo=unicode(row.slovo,'utf-8'),
                     pinyin=row.pinyin,
                     perevod=row.perevod,
