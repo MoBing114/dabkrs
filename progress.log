@@ -1763,3 +1763,12 @@
 [2016-09-27 15:46:12] EDIT dabkrs/modules/bkrstools.py: 2
 [2016-09-27 15:46:37] EDIT dabkrs/modules/bkrstools.py: 0
 [2016-09-27 16:49:20] EDIT dabkrs/modules/bkrstools.py: 0
+[2016-09-27 21:59:37] EDIT dabkrs/controllers/bkrsmaster.py: 0
+[2016-09-27 22:06:30] EDIT dabkrs/modules/zadachi.py: 5
+[2016-09-27 22:10:42] EDIT dabkrs/modules/zadachi.py: -5
+[2016-09-27 22:10:44] EDIT dabkrs/modules/zadachi.py: 0
+[2016-09-27 22:36:05] EDIT dabkrs/controllers/bkrsmaster.py: 0
+[2016-09-27 22:41:23] EDIT dabkrs/controllers/bkrsmaster.py: 0
+[2016-09-27 22:48:07] EDIT dabkrs/models/db.py: 0
+[2016-09-27 22:51:04] EDIT dabkrs/models/db.py: 0
+[2016-09-27 22:52:02] EDIT dabkrs/models/db.py: 0

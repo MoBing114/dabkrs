@@ -112,7 +112,7 @@ def addtask():
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          task_name=task_name,
-                         pvars=dict(file="static/dsl/dabkrs_160926.dsl",truncate=True),
+                         pvars=dict(file="static/dsl/dabkrs_160309.dsl",truncate=True),
                          timeout=10800,
                          sync_output=3)"""
     taskfunc=choiselist#createlinks
