@@ -125,20 +125,20 @@ def calc_records():
     db.commit()
     return "Выполнено"
 
-def SostavCreator():
-    """Анализ состава слова"""
-    from bkrstools import reshala
+def choiselist():
+    """Заполнение списка вариантов перевода"""
+    from bkrstools import sokr_perevod
     slovar=current.slovar
     db=current.db
     i=0
-    n=db(slovar.id>0).count()
-    for x in db(slovar.id>0).iterselect():
+    rows=db(slovar.choiselist==None)
+    n=rows.count()
+    for x in rows.iterselect(slovar.id,slovar.slovo,slovar.perevod,slovar.choiselist):
         i+=1
-        if x.dlina==1:
-            x.update_record(sostav=[])
-        else:
-            x.update_record(sostav=[y.slovo for j,y in enumerate(reshala(x.slovo)) if j>0])
+        print '!clear!Анализ перевода слова id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
+        slovlist=sokr_perevod(x.perevod,x.slovo).elements('li')
+        if slovlist!=None:
+            x.update_record(choiselist=[y.flatten() for y in slovlist])
         if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
-        print '!clear!Анализ состава слова id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
     db.commit()
     return "Выполнено"

@@ -23,6 +23,10 @@ reg_mi=re.compile(r"(\[m[1-4]\])")
 def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки]) синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
     if not isinstance(text,unicode):perevod=unicode(text, 'utf-8')
+    #Эранируем спецсимволы xml, если они есть в тексте
+    perevod=perevod.replace("&","&amp;")
+    perevod=perevod.replace(">","&gt;")
+    perevod=perevod.replace("<","&lt;")
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
     perevod=perevod.replace("([i]","[i](")
     perevod=perevod.replace("[/i])",")[/i]")

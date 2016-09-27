@@ -115,9 +115,10 @@ def addtask():
                          pvars=dict(file="static/dsl/dabkrs_160926.dsl",truncate=True),
                          timeout=10800,
                          sync_output=3)"""
-    taskfunc=SostavCreator#createlinks
+    taskfunc=choiselist#createlinks
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
+                         #pvars=dict(),
                          task_name=task_name,
                          timeout=10800,
                          sync_output=3)

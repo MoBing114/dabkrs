@@ -18,7 +18,7 @@ def slovintersection(x):
                x.slovo[x.lspan:x.rspan] if x.rspan!=None or x.lspan!=None else x.slovo,
                SPAN(x.slovo[x.rspan:],_class="text-warning") if x.rspan!=None else "")
 
-#@cache.action(cache_model=cache.ram)
+@cache.action(cache_model=cache.ram)
 def slovo():
     return dict(ajaxotvet=otvet())
 
