@@ -1,6 +1,7 @@
 #kitext.affix {top:30px;width:100%;background:white;z-index:1;padding:5px;margin-bottom:5px;}
+#kitext{font-size:18pt;}
 .web2py_console #w2p_keywords {width: 80%;}
-.iskomyi-text{font-size:2vmin;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
+.iskomyi-text{font-size:12pt;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
 /*.slovo:not(:only-of-type){
     display:inline-block;
     max-width: 24%;
@@ -11,7 +12,7 @@
     overflow: hidden;
     text-overflow:ellipsis;
 }*/
-.txt-label{font-size:2vmin;}
+.txt-label{font-size:12pt;}
 .l-sctn,.r-sctn{color:red}
 
 div.slovo {
@@ -48,14 +49,14 @@ div.slovo {
 .byword td{vertical-align:top;width:25%;height:100px;}
 .byword tr{vertical-align:top;}
 a:hover{color:green}
-.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:2vmin;text-align: center;}
-.py{font-family:STSong, STKaiti, sans-serif, arial;font-size:2vmin;font-weight:bold;}
-.ru{font-family:arial;font-size:2vmin;}
+.ch {font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;font-size:12pt;text-align: center;}
+.py{font-family:STSong, STKaiti, sans-serif, arial;font-size:12pt;font-weight:bold;}
+.ru{font-family:arial;font-size:12pt;}
 .highlight {background-color: yellow;}
-.m1{margin-left:5%;font-size:2vmin;font:bold;}
-.m2{margin-left:10%;font-size:1.8vmin;}
-.m3{margin-left:15%;font-size:1.5vmin;}
-.m4{margin-left:20%;font-size:1.2vmin;}
+.m1{margin-left:5%;font-size:12pt;font:bold;}
+.m2{margin-left:10%;font-size:11pt;}
+.m3{margin-left:15%;font-size:10pt;}
+.m4{margin-left:20%;font-size:9pt;}
 .green {color:green}
 .ex {color:#666666}
 .maroon {color:maroon}

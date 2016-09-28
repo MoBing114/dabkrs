@@ -107,15 +107,17 @@ def addworker():
     return "Работник запущен"
 
 def addtask():
-    """taskfunc=sozdanie_bazy
+    """
+    taskfunc=sozdanie_bazy
     #taskfunc=reporting_percentages
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          task_name=task_name,
-                         pvars=dict(file="static/dsl/dabkrs_160309.dsl",truncate=True),
+                         pvars=dict(file="static/dsl/dabkrs_160928.dsl",truncate=True),
                          timeout=10800,
-                         sync_output=3)"""
-    taskfunc=choiselist#createlinks
+                         sync_output=3)
+    """
+    taskfunc=calc_records#choiselist#createlinks
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          #pvars=dict(),

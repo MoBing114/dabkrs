@@ -6,11 +6,11 @@ slovar = db.define_table('slovar',
     Field('slovo','string',unique=True,label="Слово"),
     Field('pinyin',label="Пиньин"),
     Field('perevod',"text",label="Перевод"),
-    Field('dlina','integer',compute=lambda row:len(row.slovo),label="Длина"),
+    Field('dlina','integer',compute=lambda row:len(row.slovo if isinstance(row.slovo,unicode) else unicode(row.slovo, 'utf-8')),label="Длина"),
     Field('choiselist','list:string',label="Варианты"),
-    Field('linksto','list:reference slovar',label="Ссылка на"),
-    Field('linksfrom','list:reference slovar',label="Ссылка c"),
-    Field.Virtual('short',lambda row:"",label="Краткая форма"),
+    Field('linksto','list:reference slovar',writable=False, readable=False,label="Ссылка на"),
+    Field('linksfrom','list:reference slovar',writable=False, readable=False,label="Ссылка c"),
+    #Field.Virtual('short',lambda row:"",label="Краткая форма"),
     auth.signature,#Поля пользователей
     Field('is_active', 'boolean',writable=False, readable=False, default=True),#для контроля версий
     #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
@@ -31,4 +31,5 @@ current.slovar=slovar#Создает атрибут со ссылкой на т�
 slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.pinyin.represent=lambda pinyin,row:DIV(pinyin,_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-тэги, помещаем в контейнеры, чтобы применить стили оформления согласно классам
-slovar.short.represent=lambda value,row: sokr_perevod(row.perevod,row.slovo)#Сокращенная форма перевода (убраны лишние комментарии и примеры)
+slovar.choiselist.represent=lambda value,row:UL([x for x in value])
+#slovar.short.represent=lambda value,row: sokr_perevod(row.perevod,row.slovo)#Сокращенная форма перевода (убраны лишние комментарии и примеры)

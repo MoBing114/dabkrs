@@ -21,18 +21,23 @@ reg_x=re.compile(r"\[\*\](.*?)\[/\*\]")#DIV()
 reg_mi=re.compile(r"(\[m[1-4]\])")
 
 def normalise_perevod(text):
-    """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки]) синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
+    """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки])
+    синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
     if not isinstance(text,unicode):perevod=unicode(text, 'utf-8')
-    #Эранируем спецсимволы xml, если они есть в тексте
-    perevod=perevod.replace("&","&amp;")
-    perevod=perevod.replace(">","&gt;")
-    perevod=perevod.replace("<","&lt;")
+    #Эранируем управл. символы html, если они есть в тексте
+    perevod=perevod.replace("&","&amp;")#Амперсанд
+    perevod=perevod.replace(">","&gt;")#Больше
+    perevod=perevod.replace("<","&lt;")#Меньше
+    perevod=perevod.replace("'","&apos;")#Апостроф
+    perevod=perevod.replace('"',"&quot;")#Кавычка
+    #Очищаем или преобразуем некоторые конструкции синтаксиса словаря
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
-    perevod=perevod.replace("([i]","[i](")
-    perevod=perevod.replace("[/i])",")[/i]")
+    perevod=perevod.replace("([i]","[i](")#Открыв.скобку во внутрь
+    perevod=perevod.replace("[/i])",")[/i]")#Закр.скобку во внутрь
     perevod=perevod.replace("([c]","[c](")
     perevod=perevod.replace("[/c])",")[/c]")
     perevod=perevod.replace("[i];[/i]",";")
+    #Проверка соблюдения правил вложенности
     perevod1=[]#Список отбработанных частей
     #разобъем строку по закрывающему тэгу абзаца "[/m]"
     for x in perevod.split("[/m]"):
@@ -44,8 +49,8 @@ def normalise_perevod(text):
             if y=="":continue#Исключаем пустые
             if reg_mi.search(y)==None:y="[m1]"+y#Если открывающего тэга абзаца нет, то ставим его в начале
             perevod1.append(y)#Добавляем в список отбработанных частей
-        #В итоге полученный список должен содержать элементы начинающиеся с откр.тэга абзаца
-        #Добавляем закрывающий тэг абзаца к каждому элементу списка, сцепляем элементы и возвращаем строку
+        #В итоге полученный список perevod1 должен содержать элементы начинающиеся с откр.тэгов абзаца [m1]-[m4]
+        #Добавляем закрывающий тэг абзаца [/m] к каждому элементу списка в конец, сцепляем элементы и возвращаем строку
     return "".join([x+"[/m]" for x in perevod1 if x.strip()!=""])
 
 def repres_perevod(perevod,*args):
@@ -74,6 +79,13 @@ def repres_perevod(perevod,*args):
 
     return TAG(bs(perevod).prettify())#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup
 
+def cut_perevod(perevod,*args):
+    """Функция убирает примеры из html представления словарной статьи"""
+    tagObj=repres_perevod(perevod)#Возвращает уже объект класса TAG, а не текст
+    tagObj.elements('div.ex', replace=None)#Убираем примеры
+    tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: "" if div.flatten().strip()=="" else div)#Удаляем пустые блоки
+    return tagObj
+
 def split_perevod(div,slovo):
     """Разбивает текст в блоках div сласса m[1-4] на варианты перевода в зависимости от вида разделителя ("," или ";") и возвращает элементы списка LI"""
     text=div.flatten().strip()
@@ -82,9 +94,9 @@ def split_perevod(div,slovo):
     return CAT(*[LI(x.strip()) for x in text.split(sep) if x.strip()!=""])
 
 def sokr_perevod(perevod,slovo,*args):
-    """Функция очищает, сокращает html представление словарной статьи путем замены соответствующих тэгов"""
-    tagObj=repres_perevod(perevod)#Возвращает уже объект класса TAG, а не текст
+    """Функция создает список вариантов перевода"""
     if not isinstance(slovo,unicode):slovo=unicode(slovo, 'utf-8')
+    tagObj=repres_perevod(perevod)#Возвращает уже объект класса TAG, а не текст
     perevod_po_silke=[]
     for ref in tagObj.elements('a'):
         ref_perevod=current.db(current.slovar.slovo==ref["_slovo"]).select(current.slovar.perevod).first()
@@ -97,6 +109,7 @@ def sokr_perevod(perevod,slovo,*args):
     tagObj.elements('span', replace=None)#Убираем разрывы
     tagObj.elements('b', replace=None)#Убираем жирный
     tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: "" if div.flatten().strip()=="" else div)#Удаляем пустые блоки
+
     tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: split_perevod(div,slovo))#Непустые блоки преобразуем в элементы списка
     values=[]
     for value in [x.flatten().strip() for x in tagObj.elements('li')]:
@@ -145,6 +158,7 @@ def reshala(text):
             ishodnik.id=row.id
             ishodnik.pinyin=row.pinyin
             ishodnik.perevod=row.perevod
+            ishodnik.choiselist=row.choiselist
             if text in slovdict:slovdict.pop(text)
     #Переходим к пословному поиску
     #Заготовка в виде экземпляра Storage, ключ - позиция первого символа слова в тексте, значение - объект представления слова (экз. Storage)
@@ -161,6 +175,7 @@ def reshala(text):
                     slovo=unicode(row.slovo,'utf-8'),
                     pinyin=row.pinyin,
                     perevod=row.perevod,
+                    choiselist=row.choiselist,
                     start=start,
                     end=end,
                     dlina=end-start,
@@ -177,7 +192,7 @@ def reshala(text):
                 bolvanka[start]=value
             else:
                 bolvanka[start].childs.append(value)
-    #Если в базе вообще ничего не найдено, то возвращаем пустой список
+    #Если в базе вообще ничего не найдено, то возвращаем список с исходником
     if bolvanka.keys()==[]:return [ishodnik]
     #Заполним заготовку объектами, представляющими символы текста, которые не найдены
     for i in range(n):
@@ -186,6 +201,7 @@ def reshala(text):
                 slovo=text[i],
                 pinyin="",
                 perevod=None,
+                choiselist=None,
                 start=i,
                 end=i+1,
                 dlina=1,

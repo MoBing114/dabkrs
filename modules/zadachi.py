@@ -112,17 +112,21 @@ def createlinks():
     return "Выполнено"
 
 def calc_records():
-    """Обновление записей для расчета вычисляемых полей"""
+    """Расчет записей для вычисляемых полей"""
     slovar=current.slovar
     db=current.db
-    i=0
-    n=db(slovar.id>0).count()
-    for x in db(slovar.id>0).iterselect():
-        i+=1
-        x.update_record()
-        if i%1000==0:db.commit()#Фиксируем каждые 10000 обновлений
-        print '!clear!Обновление слова id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
-    db.commit()
+    #Список объектов вычисляемых полей
+    to_compute=[ofield for ofield in slovar if ofield.compute]
+    if to_compute:
+        i=0
+        rows=db(slovar.id>0)
+        n=rows.count()
+        for x in rows.iterselect():
+            i+=1
+            x.update_record(**{ofield.name:ofield.compute(x) for ofield in to_compute})
+            if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
+            print '!clear!Расчет записи с id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
+        db.commit()
     return "Выполнено"
 
 def choiselist():

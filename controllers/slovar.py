@@ -2,7 +2,7 @@
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-from bkrstools import text_tokenizer,repres_perevod,sokr_perevod,reshala,splitby
+from bkrstools import text_tokenizer,repres_perevod,cut_perevod,sokr_perevod,reshala,splitby
 
 def index():
     """Действие по умолчанию, показывает таблицу словарной базы данных"""
@@ -18,7 +18,7 @@ def slovintersection(x):
                x.slovo[x.lspan:x.rspan] if x.rspan!=None or x.lspan!=None else x.slovo,
                SPAN(x.slovo[x.rspan:],_class="text-warning") if x.rspan!=None else "")
 
-@cache.action(cache_model=cache.ram)
+#@cache.action(cache_model=cache.ram)
 def slovo():
     return dict(ajaxotvet=otvet())
 
@@ -41,7 +41,7 @@ def otvet():
         DIV(repres_perevod(first.perevod,first.slovo),_class="ru"),
         _class="iskomyi-text row"
         )
-    proc_func=sokr_perevod#Функция обработки статьи перевода
+    proc_func=cut_perevod#Функция обработки статьи перевода
     #Список пословных блоков
     bywords=DIV(
         DIV("Пословный:",_class="txt-label ru"),
@@ -61,7 +61,7 @@ def otvet():
     #Блок псевдоперевода (экспериментальный), берет только первые слова из списка и сшивает в предложение
     slovlist=DIV(
         DIV("Псевдоперевод:",_class="txt-label ru"),
-        " ".join([x.element('li').flatten() if x.element('li')!=None else x['_slovo'] for x in bywords.elements('div.slovo')]),
+        " ".join([x.choiselist[0] if x.choiselist!=None and x.choiselist!=[] else x.slovo for x in rez if x!=None]),
         _class="slovlist row"
     )
     return CAT(first,bywords,slovlist)
