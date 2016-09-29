@@ -77,7 +77,7 @@ def repres_perevod(perevod,*args):
     perevod=perevod.replace("\]","]</span>")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=re.sub(r"<div class='m[1-4]'>\s*</div>","",perevod)#Удаляем пустые блоки(содержащие пробельные символы)
 
-    return TAG(bs(perevod).prettify())#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup
+    return TAG(bs(perevod).renderContents())#Создаем экземпляр класса TAG путем парсинга текста, предварительно пропустив его через BeautifulSoup
 
 def cut_perevod(perevod,*args):
     """Функция убирает примеры из html представления словарной статьи"""

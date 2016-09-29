@@ -20,7 +20,7 @@ def slovintersection(x):
 
 #@cache.action(cache_model=cache.ram)
 def slovo():
-    return dict(ajaxotvet=otvet())
+    return otvet()
 
 
 def otvet():
@@ -64,4 +64,4 @@ def otvet():
         " ".join([x.choiselist[0] if x.choiselist!=None and x.choiselist!=[] else x.slovo for x in rez if x!=None]),
         _class="slovlist row"
     )
-    return CAT(first,bywords,slovlist)
+    return dict(first=first,bywords=bywords,slovlist=slovlist)

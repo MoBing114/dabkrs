@@ -30,21 +30,26 @@ URL('static','css/dabkrs.css'),
     </div>
   </div>
 </div>
-{{=ajaxotvet}}
+{{=first}}
+{{=bywords}}
+{{=slovlist}}
 <script type="text/javascript">
-$(document).ready(function(){
-  $(".ru").tooltip({
-    title: 'Нажмите для просмотра',
-    delay: {show: 2000, hide: 100 }
-  });
-});
+//$(document).ready(function(){$(".ru").tooltip({title: 'Нажмите для просмотра',delay: {show: 2000, hide: 100 }});});
 <!--Скрипт выделения текста в блоке kitext при наведении на блок slovo и отображения в правой панели-->
 jQuery(".slovo").hover(
 	function(){
-		var a=jQuery(this).attr("i").split("-"),s=1*a[0],e=1*a[1],kitext=jQuery("#hidekitext").text(),b=kitext.substring(0,s)+"<span class='highlight'>"+kitext.substring(s,e)+"</span>"+kitext.substring(e);
+		var a=jQuery(this).attr("i").split("-"),
+            s=1*a[0],
+            e=1*a[1],
+            kitext=jQuery("#hidekitext").text(),
+            b=kitext.substring(0,s)+"<span class='highlight'>"+kitext.substring(s,e)+"</span>"+kitext.substring(e);
 		jQuery("#kitext").html(b);
-        jQuery("#dsc-slovo").html("<div>"+b+"</div>"+jQuery(this).html());
-	}
+        cntnt="<div>"+b+"</div>"+jQuery(this).html()
+        ID = setTimeout(function(){jQuery("#dsc-slovo").html(cntnt);}, 500)
+	},
+    function(){
+        clearTimeout(ID);
+    }
 );
 <!--Скрипт открытия модального окна при клике на блок slovo-->
 $(".slovo").click(function() {
