@@ -1,0 +1,183 @@
+{{extend 'layout.html'}}
+<!-- Кнопки, открывающие модальное окно myModal -->
+<div class="slovo col-md-3" i="10-11" n="5" slovo="凝"><a class="black ch" href="/slovar/slovo?slovo=%E5%87%9D">凝</a><div class="py">níng</div><div class="ru"><div class="m1">
+ <b>
+  I
+ </b>
+</div>
+<div class="m1">
+ <span>
+  <i class="green">
+   гл.
+  </i>
+ </span>
+ <b>
+  А
+ </b>
+</div>
+<div class="m2">
+ <span>
+  1.
+ </span>
+ сгущаться, застывать, затвердевать; замерзать; густой, сгустившийся; застывший
+</div>
+
+
+
+
+
+<div class="m2">
+ <span>
+  2.
+ </span>
+ слать холод, морозить, сыпать инеем; морозный, холодный, лютый
+</div>
+
+
+<div class="m2">
+ <span>
+  3.
+ </span>
+ собираться вместе, стекаться; концентрироваться
+</div>
+
+
+<div class="m2">
+ <span>
+  4.
+ </span>
+ образовываться, складываться, формироваться
+</div>
+
+
+<div class="m2">
+ <span>
+  5.
+ </span>
+ застаиваться, не проходить; застойный
+</div>
+
+
+<div class="m1">
+ <span>
+  <i class="green">
+   гл.
+  </i>
+ </span>
+ <b>
+  Б
+ </b>
+</div>
+<div class="m2">
+ <span>
+  1.
+ </span>
+ сгущать; уминать, уплотнять; укладывать в порядке
+ <span>
+  (плотно)
+ </span>
+ ; -
+</div>
+
+
+
+<div class="m2">
+ <span>
+  2.
+ </span>
+ собирать, концентрировать
+</div>
+
+
+<div class="m2">
+ <span>
+  3.
+ </span>
+ осуществлять, реализовать, проводить в жизнь
+</div>
+
+<div class="m2">
+ <span>
+  4.
+ </span>
+ останавливать, прекращать
+</div>
+
+<div class="m2">
+ <span>
+  5.
+ </span>
+ тянуть
+ <i class="green">
+  <span>
+   (звучание)
+  </span>
+ </i>
+ <i class="green">
+  ,
+ </i>
+ протяжно играть на
+ <i class="green">
+  <span>
+   (инструменте)
+  </span>
+ </i>
+</div>
+
+<div class="m1">
+ <b>
+  II
+ </b>
+ <span>
+  <i class="green">
+   прил./наречие
+  </i>
+ </span>
+</div>
+<div class="m2">
+ <span>
+  1.
+ </span>
+ * строгий, справедливый, бесстрастный, холодный
+</div>
+
+<div class="m2">
+ <span>
+  2.
+ </span>
+ * настойчивый, упорный; упорно, всеми силами
+</div>
+</div></div>
+
+<!-- Модальное окно myModal -->
+<div class="modal fade" id="myModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+        <h4 class="modal-title">Заголовок модального окна</h4>
+      </div>
+      <div class="modal-body">
+        <p id="content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(document).ready(function(){
+  //при нажатию на любую кнопку, имеющую класс .btn
+  $(".slovo").mouseenter(function() {
+    $("#myModal").find('#content').html($(this).html());
+      //var ofst=$(this).offset()
+      
+   // $("#myModal").offset({top:ofst.top,left:ofst.left});
+    //открыть модальное окно с id="myModal"
+    $("#myModal").modal('show');
+  });
+  
+});
+</script>

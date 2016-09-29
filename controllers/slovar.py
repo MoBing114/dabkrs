@@ -36,7 +36,7 @@ def otvet():
     first=DIV(
         DIV("Словарный:",_class="txt-label ru"),
         DIV(first.slovo,_class="hidden",_id="hidekitext"),
-        DIV(first.slovo,_class="ch2",_id="kitext",data={'spy':'affix','offset-top':'50'}),
+        DIV(first.slovo,_class="ch2 col-md-12",_id="kitext",data={'spy':'affix','offset-top':'50'}),
         DIV(first.pinyin,_class="py"),
         DIV(repres_perevod(first.perevod,first.slovo),_class="ru"),
         _class="iskomyi-text row"
@@ -47,7 +47,7 @@ def otvet():
         DIV("Пословный:",_class="txt-label ru"),
         *[DIV(
             A(slovintersection(x),_class="black ch",_href=URL("slovo",vars=dict(slovo=x.slovo))),#Найденое слово, после обработки на смежность
-            DIV(x.pinyin,_class="py"),#Пиньин
+            DIV(repres_perevod(x.pinyin),_class="py"),#Пиньин
             DIV(proc_func(x.perevod,x.slovo),_class="ru"),#Обработанная статья перевода
             _class="slovo col-md-3 col-sm-4 col-xs-6",#Класс блока
             _i=str(x.start)+"-"+str(x.end),#расположение слова в тексте

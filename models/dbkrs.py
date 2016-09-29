@@ -29,7 +29,7 @@ current.db=db#Создает атрибут со ссылкой на базу д
 current.slovar=slovar#Создает атрибут со ссылкой на таблицу в базе данных (для ипользования в модулях)
 #Html - представления полей, используемые по умолчанию
 slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
-slovar.pinyin.represent=lambda pinyin,row:DIV(pinyin,_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
+slovar.pinyin.represent=lambda pinyin,row:DIV(repres_perevod(pinyin),_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-тэги, помещаем в контейнеры, чтобы применить стили оформления согласно классам
 slovar.choiselist.represent=lambda value,row:UL([x for x in value])
 #slovar.short.represent=lambda value,row: sokr_perevod(row.perevod,row.slovo)#Сокращенная форма перевода (убраны лишние комментарии и примеры)

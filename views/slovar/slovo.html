@@ -3,7 +3,7 @@
 URL('static','css/dabkrs.css'),
 #URL('static','js/slovo-highlight.js'),
 ])}}
-{{left_sidebar_enabled, right_sidebar_enabled=False,False}}
+{{left_sidebar_enabled, right_sidebar_enabled=True,True}}
 {{extend 'layout.html'}}
 <div class="row">
     <div class="web2py_console col-md-12">
@@ -13,19 +13,55 @@ URL('static','css/dabkrs.css'),
         </form>
     </div>
 </div>
+<!-- Модальное окно myModal -->
+<div class="modal fade" id="myModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+        <h4 class="modal-title">Заголовок модального окна</h4>
+      </div>
+      <div class="modal-body">
+        <p id="content"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
 {{=ajaxotvet}}
 <script type="text/javascript">
-<!--Скрипт выделения текста в блоке kitext при наведении на блок slovo-->
+$(document).ready(function(){
+  $(".ru").tooltip({
+    title: 'Нажмите для просмотра',
+    delay: {show: 2000, hide: 100 }
+  });
+});
+<!--Скрипт выделения текста в блоке kitext при наведении на блок slovo и отображения в правой панели-->
 jQuery(".slovo").hover(
 	function(){
 		var a=jQuery(this).attr("i").split("-"),s=1*a[0],e=1*a[1],kitext=jQuery("#hidekitext").text(),b=kitext.substring(0,s)+"<span class='highlight'>"+kitext.substring(s,e)+"</span>"+kitext.substring(e);
 		jQuery("#kitext").html(b);
+        jQuery("#dsc-slovo").html("<div>"+b+"</div>"+jQuery(this).html());
 	}
 );
+<!--Скрипт открытия модального окна при клике на блок slovo-->
+$(".slovo").click(function() {
+    $("#myModal").find('#content').html($(this).html());
+    $("#myModal").find('.modal-title').html(jQuery("#kitext").html());
+    $("#myModal").modal('show');
+  });
+//Удаляем все события при клике по ссылке
+jQuery("a").click(
+	function(){
+        $('.slovo').unbind();
+});
 </script>
-{{block right_sidebar}}
-<!--Правая боковая панель -->
-{{end}}
 {{block left_sidebar}}
 <!--Левая боковая панель -->
+{{end}}
+{{block right_sidebar}}
+<!--Правая боковая панель -->
+<div id="dsc-slovo"></div>
 {{end}}
