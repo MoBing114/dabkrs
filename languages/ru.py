@@ -312,6 +312,7 @@
 'record does not exist': 'запись не найдена',
 'Record ID': 'ID записи',
 'Record id': 'id записи',
+'Record Updated': 'Record Updated',
 'Register': 'Зарегистрироваться',
 'Registration identifier': 'Registration identifier',
 'Registration key': 'Ключ регистрации',

@@ -6,21 +6,30 @@
 </div>
 {{
 first=rows.pop(0) if rows else ""
-choises=DIV(*[UL(row.choiselist if row.choiselist else [row.slovo],_class="hidden",_id=row.id,_slovo=row.slovo) for row in rows],_class="choises")
-spanlist=CAT(*[CAT(SPAN(x.element('li')[0],**dict(_id=x['_id'],_class="spanPopover",data=dict(toggle="popover")) if x['_id'] else {}),SPAN(" ")) for x in choises.elements('ul.hidden')])
+choises=DIV(*[UL(row.choiselist if row.choiselist else [row.slovo],
+                _class="hidden",
+                _id=row.id,
+                _i="%d-%d"%(row.start,row.end),
+                _slovo=row.slovo) for row in rows],_class="choises")
+spanlist=CAT(*[CAT(SPAN(x.element('li')[0],_i=x['_i'],**dict(_id=x['_id'],_class="spanPopover",data=dict(toggle="popover")) if x['_id'] else {}),SPAN(" ")) for x in choises.elements('ul.hidden')])
 }}
 {{=choises}}
 {{=spanlist}}
 <!-- Модальное окно myModal -->
 <div class="modal fade" id="myModal" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
         <h4 class="modal-title">Заголовок модального окна</h4>
       </div>
       <div class="modal-body">
-        <p id="content"></p>
+          <div class="container-fluid">
+          <!-- Контейнер, в котором можно создавать классы системы сеток -->
+          <div class="row">
+            <div class="col-md-12"><div id="modcontent"></div></div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
@@ -105,11 +114,8 @@ $(document).ready(function(){
         var button = $(event.relatedTarget)
         // извлечь информацию из атрибута edit
         var id = button.attr('edit')
-        var editurl='{{=URL('translater', 'display_form')}}'
-        ajax(editurl+'?id='+id,[],'content');
-        // вывести эту информацию в элемент, имеющий id="content"
-        //$(this).find('#content').text(content);
-})
+        $('#modcontent').load('/translater/getedit/'+id);
+        //$('#modcontent').
+    })
     });
-
 </script>

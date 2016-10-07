@@ -1,1 +1,28 @@
 {{extend 'layout.html'}}
+<a class="btn btn-default" data-w2p_disable_with="default" data-w2p_method="GET" data-w2p_target="c1234" href="/services/api/slovar.json?id=2000" type="button">загрузить</a>
+{{#=A('загрузить',_type="button",_class="btn btn-default",_href='/services/api/slovar.json?id=2000',cid='c1234')}}
+<div id='c1234'></div>
+{{=form}}
+{{
+def slovintersection(x):
+    return CAT(SPAN(x.slovo[:x.lspan],_class="text-warning") if x.lspan!=None else "",
+               x.slovo[x.lspan:x.rspan] if x.rspan!=None or x.lspan!=None else x.slovo,
+               SPAN(x.slovo[x.rspan:],_class="text-warning") if x.rspan!=None else "")
+slovlist=DIV(*[DIV(
+                DIV(x.slovo,_class="hidden",_id="hidekitext"),
+                DIV(x.slovo,_class="ch2",_id="kitext"),
+                A(slovintersection(x),_class="black ch",_href=URL("slovo",vars=dict(slovo=x.slovo))),#Найденое слово, после обработки на смежность
+                DIV(repres_perevod(x.pinyin),_class="py"),#Пиньин
+                DIV(repres_perevod(x.perevod),_class="ru"),#Обработанная статья перевода
+                DIV(UL(x.choiselist if x.choiselist else [x.slovo]),_class="choiselist"),
+                _id=x.id,
+                _class="slovo hidden",#Класс блока
+                _i=str(x.start)+"-"+str(x.end),#расположение слова в тексте
+                _n=str(i),#номер блока(отсчет с нуля)
+                )
+                 for i,x in enumerate(rows)],
+            _class="row",
+            _id="slovlist"
+        )
+}}
+{{slovlist}}

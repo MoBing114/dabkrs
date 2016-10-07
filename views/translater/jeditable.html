@@ -1,0 +1,41 @@
+{{extend 'layout.html'}}
+{{block head}}<link href={{=URL('static','bootstrap3-editable/css/bootstrap-editable.css')}} rel="stylesheet">{{end}}
+{{block page_js}}<script src={{=URL('static','bootstrap3-editable/js/bootstrap-editable.min.js')}}></script>{{end page_js}}
+<a href="#" id="username">superuser</a>
+<br>
+<a href="#" id="username1" data-type="textarea" data-pk="1" data-url="#" data-title="Enter username">superuser</a>
+<br>
+<span id="status" data-type="select" data-pk="200" data-url="{{=URL(c='translater',f='jeditable')}}">sasdasd</span>
+<script>
+$(document).ready(function(){
+    $.fn.editable.defaults.mode = 'inline';
+
+    $('#username1').editable({
+                           type:  'text',
+                           pk:    1,
+                           name:  'username',
+                           url:   '{{=URL(c='translater',f='jeditable')}}',
+                           title: 'Enter username'
+                        });
+    $('#username').editable({mode:'popup'});
+
+    $('#status').click(function(){
+        $.getJSON('/services/api/slovar.json?id=200'/*+$(this).data('pk')*/, {}, function(json){
+            var a=json.content[0].choiselist,
+                b=json.content[0],
+                sourcelist=[],
+                index;
+            for (index=0; index<a.length; ++index){
+                sourcelist.push({'value':index,'text':a[index]});
+            };
+            $(this).data('source',sourcelist);
+            $(this).data('title',b.slovo+' '+b.pinyin+'<a>fdfdgdfd</a>');
+            $(this).editable({
+                mode:'popup',
+                html:true,
+                value:0
+                });
+        });
+    });
+});
+</script>
