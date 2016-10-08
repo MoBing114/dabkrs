@@ -1,5 +1,9 @@
+.panel-scrollable .panel-body {
+  height: 600px;
+  overflow-y: scroll;
+}
 #kitext.affix {top:30px;background:white;z-index:1;padding:1%;margin-bottom:5px;left:0}
-#kitext{font-size:16pt;}
+[id^="kitext"]{font-size:16pt;}
 .web2py_console #w2p_keywords {width: 80%;}
 .iskomyi-text{font-size:12pt;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
 /*.slovo:not(:only-of-type){

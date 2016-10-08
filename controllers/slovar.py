@@ -18,7 +18,7 @@ def slovintersection(x):
                x.slovo[x.lspan:x.rspan] if x.rspan!=None or x.lspan!=None else x.slovo,
                SPAN(x.slovo[x.rspan:],_class="text-warning") if x.rspan!=None else "")
 
-#@cache.action(cache_model=cache.ram)
+@cache.action(cache_model=cache.ram)
 def slovo():
     form = FORM(
         INPUT(_name='slovo',
@@ -26,7 +26,8 @@ def slovo():
               _id="w2p_keywords", _class="form-control", _required=""),
         INPUT(_type='submit', _value="Искать", _class="btn"),
         _id="forma-poiska",
-        _action=""
+        _action="",
+        _method="get"
     )
     if request.vars.id!=None:
         sl=slovar(request.vars.id)
