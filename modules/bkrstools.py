@@ -37,6 +37,8 @@ def normalise_perevod(text):
     perevod=perevod.replace("([c]","[c](")
     perevod=perevod.replace("[/c])",")[/c]")
     perevod=perevod.replace("[i];[/i]",";")
+    perevod=perevod.replace("[*][ex]","[ex]")
+    perevod=perevod.replace("[/ex][/*]","[/ex]")
     #Проверка соблюдения правил вложенности
     perevod1=[]#Список отбработанных частей
     #разобъем строку по закрывающему тэгу абзаца "[/m]"

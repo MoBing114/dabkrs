@@ -10,7 +10,7 @@ slovar = db.define_table('slovar',
     Field('choiselist','list:string',label="Варианты"),
     Field('linksto','list:reference slovar',writable=False, readable=False,label="Ссылка на"),
     Field('linksfrom','list:reference slovar',writable=False, readable=False,label="Ссылка c"),
-    #Field.Virtual('short',lambda row:"",label="Краткая форма"),
+    Field.Virtual('short',lambda row:"",label="Примеры"),
     auth.signature,#Поля пользователей
     Field('is_active', 'boolean',writable=False, readable=False, default=True),#для контроля версий
     #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
@@ -32,4 +32,13 @@ slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")#Помещаем 
 slovar.pinyin.represent=lambda pinyin,row:DIV(repres_perevod(pinyin),_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-тэги, помещаем в контейнеры, чтобы применить стили оформления согласно классам
 slovar.choiselist.represent=lambda value,row:UL([x for x in value])
-#slovar.short.represent=lambda value,row: sokr_perevod(row.perevod,row.slovo)#Сокращенная форма перевода (убраны лишние комментарии и примеры)
+slovar.short.represent=lambda value,row: extract(row.perevod)
+import re
+def extract(perevod):
+    a=repres_perevod(perevod)
+    exlist=[unicode(x.flatten(), 'utf-8') for x in a.elements("div.ex")]
+    exlist=[re.sub(u"([一-龥])([а-яёА-ЯЁ])",r"\1 \2",x,re.U) for x in exlist]
+    exlist=[re.sub(u"([一-龥]), *([一-龥])",u"\1，\2",x,re.U) for x in exlist]
+    exlist=[re.split(r"[ ]",x,maxsplit=1) for x in exlist]
+    
+    return TABLE(exlist)

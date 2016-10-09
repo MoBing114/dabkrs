@@ -35,7 +35,8 @@ URL('static','css/dabkrs.css'),
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span></button>
         <h4 class="modal-title">Заголовок модального окна</h4>
-        <div>
+      <div class="modal-body">
+          <div>
             <button type="button" class="btn btn-info btn-sm left" id="prev-slovo">
                 <span class="glyphicon glyphicon-chevron-left"></span>
             </button>
@@ -44,10 +45,12 @@ URL('static','css/dabkrs.css'),
             </button>
           </div>
       </div>
-      <div class="modal-body">
         <p id="content"></p>
       </div>
       <div class="modal-footer">
+        <div class="checkbox left">
+          <label><input type="checkbox" id="exshow">Убирать примеры</label>
+        </div>
         <button type="button" class="btn btn-success" data-dismiss="modal">Закрыть</button>
       </div>
     </div>
@@ -90,6 +93,7 @@ $(".slovo").click(function() {
         kitext=jQuery("#hidekitext").text(),
         b=kitext.substring(0,s)+"<span class='highlight'>"+kitext.substring(s,e)+"</span>"+kitext.substring(e);
     $("#myModal").find('.modal-title').html(b);
+    if ($('input#exshow:checked').length!=0) {$("#myModal").find("div.ex").addClass("hidden");};
     $("#myModal").modal('show');
   });
 //Скрипт обработки клика на кнопках модального окна
@@ -106,5 +110,8 @@ $("#next-slovo").click(function() {
         next=$("div.slovo").first();
     };
     next.click();
+});
+$("input#exshow").change(function() {
+    $("#myModal").find("div.ex").toggleClass("hidden");
 });
 </script>
