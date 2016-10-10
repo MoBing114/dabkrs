@@ -117,7 +117,7 @@ def addtask():
                          timeout=10800,
                          sync_output=3)
     """
-    taskfunc=calc_records#choiselist#createlinks
+    taskfunc=extract_examles#calc_records#choiselist#createlinks
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          #pvars=dict(),

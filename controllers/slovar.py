@@ -2,7 +2,7 @@
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-from bkrstools import text_tokenizer,repres_perevod,cut_perevod,sokr_perevod,reshala,splitby
+from bkrstools import *
 
 def index():
     """Действие по умолчанию, показывает таблицу словарной базы данных"""
@@ -11,6 +11,11 @@ def index():
         csv=False,
         #fields=[slovar.slovo,slovar.pinyin,slovar.perevod,slovar.spisok],
     )
+    return dict(form=form)
+def bkrsexamples():
+    """Действие по умолчанию, показывает таблицу примеров"""
+    response.view="slovar/index.html"
+    form=SQLFORM.grid(examples,csv=False)
     return dict(form=form)
 
 def slovintersection(x):

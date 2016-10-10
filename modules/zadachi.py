@@ -146,3 +146,40 @@ def choiselist():
         if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
     db.commit()
     return "Выполнено"
+
+from bkrstools import extract
+
+def extract_examles():
+    """Извлечение примеров из словаря"""
+    slovar=current.slovar
+    examples=current.examples
+    examples.truncate()
+    db=current.db
+    i,j=0,0
+    rows=db(slovar.id>0)
+    n=rows.count()
+    for x in rows.iterselect(slovar.id,slovar.perevod):
+        i+=1
+        exlist=extract(x.perevod)
+        if exlist:
+            for exam in exlist:
+                search=db(examples.slovo==exam.slovo).select().first()
+                if search:
+                    uplist=[] if search.choiselist else search.choiselist
+                    uplist.extend(exam.choiselist)
+
+                    reflist=[] if search.sourse else search.sourse
+                    if x.id not in reflist: reflist.append(x.id)
+                    if search.perevod:
+                        perevod=search.perevod.decode('utf-8')+u"[m1]"+exam.perevod+u"[/m1]"
+                    else:
+                        perevod=exam.perevod
+
+                    search.update_record(perevod=perevod,choiselist=uplist,sourse=reflist)
+                else:
+                    examples.insert(slovo=exam.slovo,perevod=exam.perevod,choiselist=exam.choiselist,sourse=[x.id])
+                    j+=1
+        if j%10000==0:db.commit()#Фиксируем каждые 10000
+        print '!clear!Извлечение примеров из перевода слова id={0:d}. Готовность {1:.2%} Найдено {2:d} примеров'.format(x.id,float(i)/n,j)
+    db.commit()
+    return "Выполнено"

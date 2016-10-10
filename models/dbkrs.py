@@ -24,7 +24,6 @@ slovar = db.define_table('slovar',
     is_active='is_active',#полем для пометки об удалении в основной таблице
     current_record_label="Измененная запись"
 )"""
-
 current.db=db#Создает атрибут со ссылкой на базу данных (для ипользования в модулях)
 current.slovar=slovar#Создает атрибут со ссылкой на таблицу в базе данных (для ипользования в модулях)
 #Html - представления полей, используемые по умолчанию
@@ -32,13 +31,4 @@ slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")#Помещаем 
 slovar.pinyin.represent=lambda pinyin,row:DIV(repres_perevod(pinyin),_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-тэги, помещаем в контейнеры, чтобы применить стили оформления согласно классам
 slovar.choiselist.represent=lambda value,row:UL([x for x in value])
-slovar.short.represent=lambda value,row: extract(row.perevod)
-import re
-def extract(perevod):
-    a=repres_perevod(perevod)
-    exlist=[unicode(x.flatten(), 'utf-8') for x in a.elements("div.ex")]
-    exlist=[re.sub(u"([一-龥])([а-яёА-ЯЁ])",r"\1 \2",x,re.U) for x in exlist]
-    exlist=[re.sub(u"([一-龥]), *([一-龥])",u"\1，\2",x,re.U) for x in exlist]
-    exlist=[re.split(r"[ ]",x,maxsplit=1) for x in exlist]
-    
-    return TABLE(exlist)
+slovar.short.represent=lambda value,row: TABLE([[x.slovo,x.pinyin,x.perevod,UL(x.choiselist)]for x in extract(row.perevod)])

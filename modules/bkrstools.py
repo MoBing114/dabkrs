@@ -15,15 +15,13 @@ reg_skobki=re.compile(r"(\(.*?\))")#SPAN()
 reg_numerate=re.compile(r"([^\d])(\d{1,2})[).]")#SPAN()
 reg_alfavite=re.compile(u"([^a-zа-я]+)([abcdeабвгд])\)")#SPAN()
 reg_m=re.compile(r"\[m([1-4])\](.*?)\[/m\]")#DIV()
-reg_e=re.compile(r"\[e\](.*?)\[/e\]")#DIV()
 reg_ex=re.compile(r"\[ex\](.*?)\[/ex\]")#DIV()
-reg_x=re.compile(r"\[\*\](.*?)\[/\*\]")#DIV()
 reg_mi=re.compile(r"(\[m[1-4]\])")
 
 def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки])
     синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
-    if not isinstance(text,unicode):perevod=unicode(text, 'utf-8')
+    perevod=unicode(text, 'utf-8') if not isinstance(text,unicode) else text
     #Эранируем управл. символы html, если они есть в тексте
     perevod=perevod.replace("&","&amp;")#Амперсанд
     perevod=perevod.replace(">","&gt;")#Больше
@@ -32,13 +30,20 @@ def normalise_perevod(text):
     perevod=perevod.replace('"',"&quot;")#Кавычка
     #Очищаем или преобразуем некоторые конструкции синтаксиса словаря
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
-    perevod=perevod.replace("([i]","[i](")#Открыв.скобку во внутрь
-    perevod=perevod.replace("[/i])",")[/i]")#Закр.скобку во внутрь
-    perevod=perevod.replace("([c]","[c](")
-    perevod=perevod.replace("[/c])",")[/c]")
     perevod=perevod.replace("[i];[/i]",";")
     perevod=perevod.replace("[*][ex]","[ex]")
     perevod=perevod.replace("[/ex][/*]","[/ex]")
+    perevod=perevod.replace("[*]","[ex]")
+    perevod=perevod.replace("[/*]","[/ex]")
+    perevod=perevod.replace("[e]","[ex]")
+    perevod=perevod.replace("[/e]","[/ex]")
+    #Перенос скобок во внутрь тэгов
+    perevod=perevod.replace("([i]","[i](")
+    perevod=perevod.replace("[/i])",")[/i]")
+    perevod=perevod.replace("([c]","[c](")
+    perevod=perevod.replace("[/c])",")[/c]")
+    perevod=perevod.replace("([b]","[b](")
+    perevod=perevod.replace("[/b])",")[/b]")
     #Проверка соблюдения правил вложенности
     perevod1=[]#Список отбработанных частей
     #разобъем строку по закрывающему тэгу абзаца "[/m]"
@@ -72,9 +77,7 @@ def repres_perevod(perevod,*args):
     perevod=reg_p.sub(r"<i class='green'>\1</i>",perevod)#Заменяем тэги пометок [p] на html тэги
     perevod=reg_b.sub(r"<b>\1</b>",perevod)#Заменяем тэги жирным [b] на html тэги
     perevod=reg_m.sub(r"<div class='m\1'>\2</div>",perevod)#Заменяем тэги абзацев [m1~4] на html тэги
-    perevod=reg_e.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [e] на html тэги
     perevod=reg_ex.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [ex] на html тэги
-    perevod=reg_x.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [*] на html тэги
     perevod=perevod.replace("\[","<span>[")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=perevod.replace("\]","]</span>")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=re.sub(r"<div class='m[1-4]'>\s*</div>","",perevod)#Удаляем пустые блоки(содержащие пробельные символы)
@@ -92,7 +95,7 @@ def split_perevod(div,slovo):
     """Разбивает текст в блоках div сласса m[1-4] на варианты перевода в зависимости от вида разделителя ("," или ";") и возвращает элементы списка LI"""
     text=div.flatten().strip()
     sep=","
-    if ";" in text or re.search(u"[，、。]",slovo)!=None:sep=";"
+    if ";" in text or re.search(u"[,，、。]",slovo):sep=";"
     return CAT(*[LI(x.strip()) for x in text.split(sep) if x.strip()!=""])
 
 def sokr_perevod(perevod,slovo,*args):
@@ -271,3 +274,21 @@ def splitby(spisok,ngroup):
         i+=1
         if spisok==[]:newspisok.append(x)
     return newspisok
+
+def extract(perevod):
+    """Извлечение примеров из словарной статьи"""
+    a=normalise_perevod(perevod)
+    exlist=[x for x in reg_ex.findall(a)]#Список примеров
+    #Добавляем разделитель <exsep> в конце китайского текста
+    exlist=[re.sub(u"([\\\[\]0-9a-zA-Z]*[а-яёА-ЯЁ])",r"<exsep>\1",x,count=1,flags=re.U) for x in exlist]
+    #Добавляем разделитель <exsep> в конце, если нет русского текста
+    exlist=[x if re.search(u"[а-яёА-ЯЁ]",x,re.U) else x+"<exsep>" for x in exlist]
+    exlist1=[]
+    for x in exlist:
+        slovo,perevod=x.split("<exsep>")
+        pinyin=";".join([y for y in reg_b.findall(slovo)])
+        slovo=reg_b.sub(r"",slovo)
+        slovlist=sokr_perevod(perevod,slovo).elements('li')
+        choiselist=[y.flatten() for y in slovlist]
+        exlist1.append(Storage(slovo=slovo,pinyin=pinyin,perevod=perevod,choiselist=choiselist))
+    return exlist1
