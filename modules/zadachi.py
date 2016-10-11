@@ -14,6 +14,14 @@ web2py.exe -K dabkrs для исполняемого файла windows
 from gluon import *
 import re,os,time,sys,chardet
 
+def reporting_percentages(*args,**vars):
+    """Тестовая функция"""
+    for i in range(10):
+        time.sleep(5)
+        msg='!clear! готово %d'%(i)
+        print msg
+    return "задача выполнена"
+
 def convertfile(filePath):
     """Пересохранение файла в кодировке "utf-8", если она отличается"""
     #Файл может быть большим, определим кодировку по первой строке
@@ -33,13 +41,23 @@ def convertfile(filePath):
             f.write(text)
             f.close()
 
-def reporting_percentages(*args,**vars):
-    """Тестовая функция"""
-    for i in range(10):
-        time.sleep(5)
-        msg='!clear! готово %d'%(i)
-        print msg
-    return "задача выполнена"
+dsl_pattern=re.compile(r"(?m)^\n([^ ].*?)\n (.*?)\n (.*?)$")
+
+def parse_dsl(text):
+    """Разборка текста в формате dsl и добавление в словарь"""
+    slovar=current.slovar
+    db=current.db
+    inserted,updated=0,0
+    for slovo,pinyin,perevod in dsl_pattern.findall(text):
+        try:
+            slovar.insert(slovo=slovo,pinyin=pinyin,perevod=perevod)
+            inserted+=1
+        except:
+            row=db(slovar.slovo==slovo).select().first()
+            row.perevod=perevod+row.perevod.encode('utf-8')
+            row.update_record()
+            updated+=1
+    return inserted,updated
 
 def sozdanie_bazy(file,truncate=False):
     """Заполнение базы из файла словаря в формате DSL.
@@ -48,15 +66,13 @@ def sozdanie_bazy(file,truncate=False):
     находит "слово, пиньин и перевод" и записывает в базу данных в юникод кодировке"""
     if not os.path.exists(file): file=os.path.normpath(os.path.join(current.request.folder,file))
     if not os.path.exists(file): return "Файл не найден"
-    dsl_pattern=re.compile(r"(?m)^\n([^ ].*?)\n (.*?)\n (.*?)$")
     convertfile(file)#Пересохраняем в utf-8
     slovar=current.slovar
     db=current.db
     n=sum(1 for i in open(file, 'r'))#Общее число строк в файле для подсчета процентов
-    rezult=[]
     with open(file,mode='r') as f:
         if truncate:slovar.truncate()#Опустошаем таблицу базы данных, если надо
-        i,j=0,0#Счетчик строк и записей
+        i,j,k=0,0,0#Счетчик строк в файле и записей в базе данных
         #файл большой, поэтому читаем его блоками по 10000 строк
         nbl=10000
         block=[f.readline()]
@@ -68,20 +84,25 @@ def sozdanie_bazy(file,truncate=False):
             while block[-1]!="\n" and block[-1]!="":
                 block.append(f.readline())
                 i+=1
-                #print '!clear!{0:d}'.format(i)
             #Приступаем к поиску слов в блоке текста и вставке в базу
-            for slovo,pinyin,perevod in dsl_pattern.findall("".join(block)):
-                try:
-                    slovar.insert(slovo=slovo,pinyin=pinyin,perevod=perevod)
-                    j+=1
-                except:
-                    rezult.append(u"Ошибка вставки слова: "+slovo+u"||"+perevod)
-            if j%10000==0:db.commit()#Фиксируем каждые 10000 вставок
-            print '!clear!Добавлено {0:d} слов, готовность словаря {1:.2%}'.format(j,float(i)/n)#!clear! спецкоманда работнику для очистки вывода
+            blocktext="".join(block)
+            inserted,updated=parse_dsl(blocktext)
+            j+=inserted
+            k+=updated
+            print '!clear!Добавлено {0:d} слов, обновлено {1:d} готовность словаря {2:.2%}'.format(j,k,float(i)/n)#!clear! спецкоманда работнику для очистки вывода
+            if j%10000==0:
+                db.commit()
         f.close()
-        db.commit()
-        rezult.append(u"Вставка завершена, добавлено %d записей"%(j))
-        return "\n".join(rezult)
+        indexing()
+        extract_examles()
+        return "Complite"
+
+def indexing():
+    db=current.db
+    db.executesql('CREATE INDEX IF NOT EXISTS slovoidx ON slovar (slovo);')
+    db.executesql('CREATE INDEX IF NOT EXISTS pinyinidx ON slovar (pinyin);')
+    db.executesql('CREATE INDEX IF NOT EXISTS perevodidx ON slovar (perevod);')
+    return "Индексация выполнена"
 
 def createlinks():
     """Создание ссылок между записями словарных статей"""
@@ -109,7 +130,7 @@ def createlinks():
         if j%1000==0:db.commit()#Фиксируем каждые 1000 вставок
         print '!clear!Ссылок найдено {0:d}. Готовность {1:.2%}'.format(j,float(i)/n)
     db.commit()
-    return "Выполнено"
+    return "Complite"
 
 def calc_records():
     """Расчет записей для вычисляемых полей"""
@@ -127,7 +148,7 @@ def calc_records():
             if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
             print '!clear!Расчет записи с id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
         db.commit()
-    return "Выполнено"
+    return "Complite"
 
 def choiselist():
     """Заполнение списка вариантов перевода"""
@@ -135,7 +156,7 @@ def choiselist():
     slovar=current.slovar
     db=current.db
     i=0
-    rows=db(slovar.choiselist==None)
+    rows=db(slovar.choiselist==[])
     n=rows.count()
     for x in rows.iterselect(slovar.id,slovar.slovo,slovar.perevod,slovar.choiselist):
         i+=1
@@ -145,41 +166,49 @@ def choiselist():
             x.update_record(choiselist=[y.flatten() for y in slovlist])
         if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
     db.commit()
-    return "Выполнено"
-
-from bkrstools import extract
+    return "Complite"
 
 def extract_examles():
     """Извлечение примеров из словаря"""
     slovar=current.slovar
-    examples=current.examples
-    examples.truncate()
     db=current.db
-    i,j=0,0
+    i,j,k,l=0,0,0,0
     rows=db(slovar.id>0)
     n=rows.count()
     for x in rows.iterselect(slovar.id,slovar.perevod):
         i+=1
-        exlist=extract(x.perevod)
-        if exlist:
-            for exam in exlist:
-                search=db(examples.slovo==exam.slovo).select().first()
-                if search:
-                    uplist=[] if search.choiselist else search.choiselist
-                    uplist.extend(exam.choiselist)
-
-                    reflist=[] if search.sourse else search.sourse
-                    if x.id not in reflist: reflist.append(x.id)
-                    if search.perevod:
-                        perevod=search.perevod.decode('utf-8')+u"[m1]"+exam.perevod+u"[/m1]"
-                    else:
-                        perevod=exam.perevod
-
-                    search.update_record(perevod=perevod,choiselist=uplist,sourse=reflist)
-                else:
-                    examples.insert(slovo=exam.slovo,perevod=exam.perevod,choiselist=exam.choiselist,sourse=[x.id])
-                    j+=1
-        if j%10000==0:db.commit()#Фиксируем каждые 10000
-        print '!clear!Извлечение примеров из перевода слова id={0:d}. Готовность {1:.2%} Найдено {2:d} примеров'.format(x.id,float(i)/n,j)
+        updated,inserted=extract_save_examples(x.perevod,x.id)
+        j+=updated+inserted
+        k+=updated
+        l+=inserted
+        print '!clear!Cлово id={0:d}. Готовность {1:.2%} Найдено {2:d}. Обновлено {3:d}. Вставлено {4:d}'.format(x.id,float(i)/n,j,k,l)
+        if j%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
     db.commit()
-    return "Выполнено"
+    return "Complite"
+
+from bkrstools import extract
+
+def extract_save_examples(perevod,id=None):
+    """Извлечение и сохранение примеров из перевода"""
+    slovar=current.slovar
+    db=current.db
+    exlist=extract(perevod)
+    updated,inserted=0,0
+    for exam in exlist:
+        try:
+            slovar.insert(
+                slovo=exam.slovo,
+                pinyin=exam.pinyin,
+                perevod=exam.perevod,
+                linksfrom=[id] if id else [],
+                is_example=True)
+            inserted+=1
+        except:
+            row=db(slovar.slovo==exam.slovo).select().first()
+            if id and id not in row.linksfrom: row.linksfrom.append(id)
+            if exam.perevod not in row.perevod.decode('utf-8'):
+                row.perevod=row.perevod.decode('utf-8')+u"[apndx]"+exam.perevod+u"[/apndx]"
+                row.with_appendix=True
+                row.update_record()
+                updated+=1
+    return updated,inserted

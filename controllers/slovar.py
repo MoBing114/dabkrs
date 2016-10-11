@@ -12,11 +12,6 @@ def index():
         #fields=[slovar.slovo,slovar.pinyin,slovar.perevod,slovar.spisok],
     )
     return dict(form=form)
-def bkrsexamples():
-    """Действие по умолчанию, показывает таблицу примеров"""
-    response.view="slovar/index.html"
-    form=SQLFORM.grid(examples,csv=False)
-    return dict(form=form)
 
 def slovintersection(x):
     return CAT(SPAN(x.slovo[:x.lspan],_class="text-warning") if x.lspan!=None else "",

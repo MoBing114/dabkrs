@@ -18,14 +18,9 @@ URL('static','css/dabkrs.css'),
 {{end}}
 {{block right_sidebar}}
 <!--Правая боковая панель -->
-<div class="panel panel-info panel-scrollable">
-  <div class="panel-heading">
-      <h1 class="panel-title">Словарь</h1>
-  </div>
+<div>
   <div id="kitext-panel"></div>
-  <div class="panel-body">
-      <div id="dsc-slovo"></div>
-    </div>
+  <div id="dsc-slovo"></div>
 </div>
 {{end}}
 <!-- Модальное окно myModal -->
@@ -84,7 +79,7 @@ jQuery("a").click(
         $('.slovo').unbind();
 });
 <!--Скрипт открытия модального окна при клике на блок slovo-->
-$(".slovo").click(function() {
+$(".slovo").dblclick(function() {
     $("#myModal").attr('i',$(this).attr('i'));
     $("#myModal").find('#content').html($(this).html());
     var a=$(this).attr("i").split("-"),
@@ -102,14 +97,14 @@ $("#prev-slovo").click(function() {
     if (prev.length===0) {
         prev=$("div.slovo").last();
     };
-    prev.click();
+    prev.dblclick();
 });
 $("#next-slovo").click(function() {
     var next=$(".slovo[i="+$("#myModal").attr('i')+"]").next("div.slovo").first();
     if (next.length===0) {
         next=$("div.slovo").first();
     };
-    next.click();
+    next.dblclick();
 });
 $("input#exshow").change(function() {
     $("#myModal").find("div.ex").toggleClass("hidden");

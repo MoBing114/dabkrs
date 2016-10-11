@@ -17,6 +17,7 @@ reg_alfavite=re.compile(u"([^a-zа-я]+)([abcdeабвгд])\)")#SPAN()
 reg_m=re.compile(r"\[m([1-4])\](.*?)\[/m\]")#DIV()
 reg_ex=re.compile(r"\[ex\](.*?)\[/ex\]")#DIV()
 reg_mi=re.compile(r"(\[m[1-4]\])")
+reg_apndx=re.compile(r"\[apndx\](.*?)\[/apndx\]")
 
 def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки])
@@ -78,6 +79,7 @@ def repres_perevod(perevod,*args):
     perevod=reg_b.sub(r"<b>\1</b>",perevod)#Заменяем тэги жирным [b] на html тэги
     perevod=reg_m.sub(r"<div class='m\1'>\2</div>",perevod)#Заменяем тэги абзацев [m1~4] на html тэги
     perevod=reg_ex.sub(r"<div class='ex'>\1</div>",perevod)#Заменяем тэги примера [ex] на html тэги
+    perevod=reg_apndx.sub(r"<div class='apndx'>\1</div>",perevod)
     perevod=perevod.replace("\[","<span>[")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=perevod.replace("\]","]</span>")#Заменяем экранирование спецсимвола синтаксиса словарной статьи
     perevod=re.sub(r"<div class='m[1-4]'>\s*</div>","",perevod)#Удаляем пустые блоки(содержащие пробельные символы)
@@ -288,7 +290,5 @@ def extract(perevod):
         slovo,perevod=x.split("<exsep>")
         pinyin=";".join([y for y in reg_b.findall(slovo)])
         slovo=reg_b.sub(r"",slovo)
-        slovlist=sokr_perevod(perevod,slovo).elements('li')
-        choiselist=[y.flatten() for y in slovlist]
-        exlist1.append(Storage(slovo=slovo,pinyin=pinyin,perevod=perevod,choiselist=choiselist))
+        exlist1.append(Storage(slovo=slovo,pinyin=pinyin,perevod=perevod))
     return exlist1

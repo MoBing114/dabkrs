@@ -7,10 +7,12 @@ slovar = db.define_table('slovar',
     Field('pinyin',label="Пиньин"),
     Field('perevod',"text",label="Перевод"),
     Field('dlina','integer',compute=lambda row:len(row.slovo if isinstance(row.slovo,unicode) else unicode(row.slovo, 'utf-8')),label="Длина"),
-    Field('choiselist','list:string',label="Варианты"),
-    Field('linksto','list:reference slovar',writable=False, readable=False,label="Ссылка на"),
-    Field('linksfrom','list:reference slovar',writable=False, readable=False,label="Ссылка c"),
+    Field('choiselist','list:string', default=[],label="Варианты"),
+    Field('linksto','list:reference slovar', default=[],writable=False, readable=False,label="Ссылка на"),
+    Field('linksfrom','list:reference slovar', default=[],writable=False, readable=False,label="Ссылка c"),
     Field.Virtual('short',lambda row:"",label="Примеры"),
+    Field('is_example', 'boolean', default=False,label="Это пример?"),
+    Field('with_appendix', 'boolean', default=False,label="С приложением"),
     auth.signature,#Поля пользователей
     Field('is_active', 'boolean',writable=False, readable=False, default=True),#для контроля версий
     #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
