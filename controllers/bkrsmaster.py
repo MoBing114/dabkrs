@@ -107,7 +107,7 @@ def addworker():
     return "Работник запущен"
 
 def addtask():
-    """
+    
     taskfunc=sozdanie_bazy
     #taskfunc=reporting_percentages
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
@@ -117,13 +117,13 @@ def addtask():
                          timeout=10800,
                          sync_output=3)
     """
-    taskfunc=choiselist#extract_examles#calc_records#createlinks
+    taskfunc=extract_examles#choiselist#calc_records#createlinks
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__
     scheduler.queue_task(taskfunc,
                          #pvars=dict(),
                          task_name=task_name,
                          timeout=10800,
-                         sync_output=3)
+                         sync_output=3)"""
     response.flash="Задача добавлена"
 
 def indexing():
@@ -137,7 +137,7 @@ def start_worker():
     winwworker=os.path.join(request.env.web2py_path,'web2py.exe')
     pyworker=os.path.join(request.env.web2py_path,'web2py.py')
     if os.path.isfile(winwworker):
-        p = subprocess.Popen([winwworker, '-K', 'dabkrs'])
+        p = subprocess.Popen([winwworker, '-K', request.application])
     else:
-        p = subprocess.Popen(['python',pyworker, '-K', 'dabkrs'])
+        p = subprocess.Popen(['python',pyworker, '-K', request.application])
     if p.poll()==None:response.flash="Работник запущен"

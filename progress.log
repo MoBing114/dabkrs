@@ -3067,3 +3067,9 @@
 [2016-10-11 16:46:30] EDIT dabkrs/modules/bkrstools.py: 0
 [2016-10-11 16:48:24] EDIT dabkrs/views/slovar/slovo.html: 0
 [2016-10-11 16:52:47] EDIT dabkrs/controllers/bkrsmaster.py: 1
+[2016-10-12 10:10:49] EDIT dabkrs/controllers/bkrsmaster.py: 0
+[2016-10-12 16:27:35] EDIT dabkrs/models/dbkrs.py: 1
+[2016-10-12 16:33:19] EDIT dabkrs/modules/zadachi.py: 5
+[2016-10-12 16:33:58] EDIT dabkrs/modules/zadachi.py: 1
+[2016-10-12 16:36:03] EDIT dabkrs/modules/zadachi.py: 0
+[2016-10-12 17:00:25] EDIT dabkrs/models/dbkrs.py: 1

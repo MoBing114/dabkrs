@@ -13,6 +13,8 @@ slovar = db.define_table('slovar',
     Field.Virtual('short',lambda row:"",label="Примеры"),
     Field('is_example', 'boolean', default=False,label="Это пример?"),
     Field('with_appendix', 'boolean', default=False,label="С приложением"),
+    Field('with_examples', 'boolean', default=False,label="С примерами"),
+    Field('processed', 'boolean', default=False,label="Обработан"),
     auth.signature,#Поля пользователей
     Field('is_active', 'boolean',writable=False, readable=False, default=True),#для контроля версий
     #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
@@ -32,5 +34,6 @@ current.slovar=slovar#Создает атрибут со ссылкой на т�
 slovar.slovo.represent=lambda slovo,row:DIV(slovo,_class="ch")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.pinyin.represent=lambda pinyin,row:DIV(repres_perevod(pinyin),_class="py")#Помещаем в контейнер, чтобы применить стили оформления согласно классу
 slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-тэги, помещаем в контейнеры, чтобы применить стили оформления согласно классам
+slovar.linksfrom.represent=lambda value,row:UL([A(x,_href=URL(c="slovar",f="slovo",vars=dict(id=x))) for x in value])
 slovar.choiselist.represent=lambda value,row:UL([x for x in value])
-slovar.short.represent=lambda value,row: TABLE([[x.slovo,x.pinyin,x.perevod,UL(x.choiselist)]for x in extract(row.perevod)])
+slovar.short.represent=lambda value,row: TABLE([[x.slovo,x.pinyin,x.perevod]for x in extract(row.perevod)],_border="2px")

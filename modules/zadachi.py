@@ -50,11 +50,19 @@ def parse_dsl(text):
     inserted,updated=0,0
     for slovo,pinyin,perevod in dsl_pattern.findall(text):
         try:
-            slovar.insert(slovo=slovo,pinyin=pinyin,perevod=perevod)
+            slovar.insert(
+                slovo=slovo,
+                pinyin=pinyin,
+                perevod=perevod,
+                with_examples=re.search(r"\[ex{0,1}\]",perevod)!=None
+            )
             inserted+=1
         except:
+            db.commit()
             row=db(slovar.slovo==slovo).select().first()
+            if not row:continue
             row.perevod=perevod+row.perevod.encode('utf-8')
+            row.with_examples=re.search(r"\[ex{0,1}\]",row.perevod)!=None
             row.update_record()
             updated+=1
     return inserted,updated
@@ -90,11 +98,9 @@ def sozdanie_bazy(file,truncate=False):
             j+=inserted
             k+=updated
             print '!clear!Добавлено {0:d} слов, обновлено {1:d} готовность словаря {2:.2%}'.format(j,k,float(i)/n)#!clear! спецкоманда работнику для очистки вывода
-            if j%10000==0:
-                db.commit()
+            db.commit()
         f.close()
-        indexing()
-        extract_examles()
+        db.commit()
         return "Complite"
 
 def indexing():
@@ -173,7 +179,7 @@ def extract_examles():
     slovar=current.slovar
     db=current.db
     i,j,k,l=0,0,0,0
-    rows=db(slovar.id>0)
+    rows=db((slovar.with_examples==True)&(slovar.is_example==False)&(slovar.processed==False))
     n=rows.count()
     for x in rows.iterselect(slovar.id,slovar.perevod):
         i+=1
@@ -182,8 +188,10 @@ def extract_examles():
         k+=updated
         l+=inserted
         print '!clear!Cлово id={0:d}. Готовность {1:.2%} Найдено {2:d}. Обновлено {3:d}. Вставлено {4:d}'.format(x.id,float(i)/n,j,k,l)
-        if j%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
-    db.commit()
+        x.processed=True
+        x.update_record()
+        #if j%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
+        db.commit()
     return "Complite"
 
 from bkrstools import extract
@@ -204,7 +212,9 @@ def extract_save_examples(perevod,id=None):
                 is_example=True)
             inserted+=1
         except:
+            db.commit()
             row=db(slovar.slovo==exam.slovo).select().first()
+            if not row:continue
             if id and id not in row.linksfrom: row.linksfrom.append(id)
             if exam.perevod not in row.perevod.decode('utf-8'):
                 row.perevod=row.perevod.decode('utf-8')+u"[apndx]"+exam.perevod+u"[/apndx]"
