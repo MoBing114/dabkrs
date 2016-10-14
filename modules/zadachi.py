@@ -26,45 +26,52 @@ def convertfile(filePath):
     """Пересохранение файла в кодировке "utf-8", если она отличается"""
     #Файл может быть большим, определим кодировку по первой строке
     with open(filePath, "rb") as F:
-        text = F.readline()
+        text = "".join([F.readline() for i in range(20)])
         enc = chardet.detect(text).get("encoding")
         F.close()
+    print '!clear!'+enc
     if enc and enc.lower() != "utf-8":
         #Если кодировка нужна, то открываем файл и читаем текст
         with open(filePath, "rb") as F:
             text=F.read()
             F.close()
-        #Декодируем и энкодируем в нужную кодировку
+        #энкодируем в нужную кодировку
         text = text.decode(enc)
         text = text.encode("utf-8")
         with open(filePath, "wb") as f:#Перезаписываем файл
             f.write(text)
             f.close()
 
-dsl_pattern=re.compile(r"(?m)^\n([^ ].*?)\n (.*?)\n (.*?)$")
+dsl_pattern=re.compile(r"(?m)^([^ ].*?$)(\n^ .*?$)((\n^ .*?$)*)") #(?m)^\n([^ ].*?)\n (.*?)\n (.*?)$
 
 def parse_dsl(text):
     """Разборка текста в формате dsl и добавление в словарь"""
     slovar=current.slovar
     db=current.db
     inserted,updated=0,0
-    for slovo,pinyin,perevod in dsl_pattern.findall(text):
+    for group in dsl_pattern.findall(text):
+        group=[x.strip() for x in group]
+        slovo=group[0]
+        pinyin=group[1] if group[2] else ''
+        perevod=group[2] if group[2] else group[1]
+        is_example=group[2]==''
         try:
             slovar.insert(
                 slovo=slovo,
                 pinyin=pinyin,
                 perevod=perevod,
-                with_examples=re.search(r"\[ex{0,1}\]",perevod)!=None
+                is_example=is_example
             )
             inserted+=1
         except:
             db.commit()
             row=db(slovar.slovo==slovo).select().first()
             if not row:continue
-            row.perevod=perevod+row.perevod.encode('utf-8')
-            row.with_examples=re.search(r"\[ex{0,1}\]",row.perevod)!=None
-            row.update_record()
-            updated+=1
+            if perevod not in row.perevod:
+                if pinyin and not pinyin in row.pinyin:row.pinyin=row.pinyin+";"+pinyin
+                row.perevod=row.perevod+"[apndx]"+perevod+"[/apndx]"
+                row.update_record()
+                updated+=1
     return inserted,updated
 
 def sozdanie_bazy(file,truncate=False):
@@ -87,7 +94,7 @@ def sozdanie_bazy(file,truncate=False):
         while block[-1]:
             block=[block[-1]]
             [block.append(f.readline()) for ii in range(nbl)]
-            i+=nbl
+            i+=nbl if i<n else n#На случай если отстаток текста содержит строк меньше чем в заданном блоке
             #блок должен заканчиваться на строке "\n" либо на символе конца файла, проверяем и читаем дальше, пока не найдем эту строку
             while block[-1]!="\n" and block[-1]!="":
                 block.append(f.readline())
@@ -151,9 +158,8 @@ def calc_records():
         for x in rows.iterselect():
             i+=1
             x.update_record(**{ofield.name:ofield.compute(x) for ofield in to_compute})
-            if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
+            db.commit()
             print '!clear!Расчет записи с id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
-        db.commit()
     return "Complite"
 
 def choiselist():
@@ -179,7 +185,9 @@ def extract_examles():
     slovar=current.slovar
     db=current.db
     i,j,k,l=0,0,0,0
-    rows=db((slovar.with_examples==True)&(slovar.is_example==False)&(slovar.processed==False))
+    #Запрос на слова, которые содержат примеры, сами не являются примером, не обработаные, с русским переводом
+    query=((slovar.with_examples==True)&(slovar.is_example==False)&(slovar.processed==False)&(slovar.with_ru==True))
+    rows=db(query)
     n=rows.count()
     for x in rows.iterselect(slovar.id,slovar.perevod):
         i+=1
@@ -190,7 +198,6 @@ def extract_examles():
         print '!clear!Cлово id={0:d}. Готовность {1:.2%} Найдено {2:d}. Обновлено {3:d}. Вставлено {4:d}'.format(x.id,float(i)/n,j,k,l)
         x.processed=True
         x.update_record()
-        #if j%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
         db.commit()
     return "Complite"
 
@@ -218,7 +225,6 @@ def extract_save_examples(perevod,id=None):
             if id and id not in row.linksfrom: row.linksfrom.append(id)
             if exam.perevod not in row.perevod.decode('utf-8'):
                 row.perevod=row.perevod.decode('utf-8')+u"[apndx]"+exam.perevod+u"[/apndx]"
-                row.with_appendix=True
                 row.update_record()
                 updated+=1
     return updated,inserted

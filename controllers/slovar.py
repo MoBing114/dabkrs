@@ -48,26 +48,29 @@ def slovo():
             DIV(repres_perevod(first.perevod),_class="ru"),
             _class="iskomyi-text row"
             )
-        #Список пословных блоков
-        bywords=DIV(
-            DIV("Пословный:",_class="txt-label ru"),
-            *[DIV(
-                A(slovintersection(x),_class="black ch",_href=URL("slovo",vars=dict(slovo=x.slovo))),#Найденое слово, после обработки на смежность
-                DIV(repres_perevod(x.pinyin),_class="py"),#Пиньин
-                DIV(repres_perevod(x.perevod),_class="ru"),#Обработанная статья перевода
-                _class="slovo col-md-3 col-sm-4 col-xs-6",#Класс блока
-                _i=str(x.start)+"-"+str(x.end),#расположение слова в тексте
-                _n=str(i),#номер блока(отсчет с нуля)
-                _slovo=x.slovo#само слово
-                    )
-                 for i,x in enumerate(rez)],
-            _class="row",
-            _id="shkatulka-slov"
-        )
-        #Блок псевдоперевода (экспериментальный), берет только первые слова из списка и сшивает в предложение
-        slovlist=DIV(
-            DIV("Псевдоперевод:",_class="txt-label ru"),
-            " ".join([x.choiselist[0] if x.choiselist!=None and x.choiselist!=[] else x.slovo for x in rez if x!=None]),
-            _class="slovlist row"
-        )
+        if rez==[]:
+            bywords,slovlist="",""
+        else:
+            #Список пословных блоков
+            bywords=DIV(
+                DIV("Пословный:",_class="txt-label ru"),
+                *[DIV(
+                    A(slovintersection(x),_class="black ch",_href=URL("slovo",vars=dict(slovo=x.slovo))),#Найденое слово, после обработки на смежность
+                    DIV(repres_perevod(x.pinyin),_class="py"),#Пиньин
+                    DIV(repres_perevod(x.perevod),_class="ru"),#Обработанная статья перевода
+                    _class="slovo col-md-3 col-sm-4 col-xs-6",#Класс блока
+                    _i=str(x.start)+"-"+str(x.end),#расположение слова в тексте
+                    _n=str(i),#номер блока(отсчет с нуля)
+                    _slovo=x.slovo#само слово
+                        )
+                     for i,x in enumerate(rez)],
+                _class="row",
+                _id="shkatulka-slov"
+            )
+            #Блок псевдоперевода (экспериментальный), берет только первые слова из списка и сшивает в предложение
+            slovlist=DIV(
+                DIV("Псевдоперевод:",_class="txt-label ru"),
+                " ".join([x.choiselist[0] if x.choiselist!=None and x.choiselist!=[] else x.slovo for x in rez if x!=None]),
+                _class="slovlist row"
+            )
     return dict(form=form,first=first,bywords=bywords,slovlist=slovlist)
