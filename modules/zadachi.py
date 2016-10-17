@@ -186,7 +186,7 @@ def extract_examles():
     db=current.db
     i,j,k,l=0,0,0,0
     #Запрос на слова, которые содержат примеры, сами не являются примером, не обработаные, с русским переводом
-    query=((slovar.with_examples==True)&(slovar.is_example==False)&(slovar.processed==False)&(slovar.with_ru==True))
+    query=slovar.with_examples==True
     rows=db(query)
     n=rows.count()
     for x in rows.iterselect(slovar.id,slovar.perevod):
@@ -221,10 +221,12 @@ def extract_save_examples(perevod,id=None):
         except:
             db.commit()
             row=db(slovar.slovo==exam.slovo).select().first()
-            if not row:continue
-            if id and id not in row.linksfrom: row.linksfrom.append(id)
+            if not row or not exam.perevod:continue
+
             if exam.perevod not in row.perevod.decode('utf-8'):
-                row.perevod=row.perevod.decode('utf-8')+u"[apndx]"+exam.perevod+u"[/apndx]"
+                if id and id not in row.linksfrom: row.linksfrom.append(id)
+                if exam.pinyin: row.pinyin=row.pinyin+";"+exam.pinyin.encode('utf-8') if not exam.pinyin.encode('utf-8') in row.pinyin else row.pinyin
+                row.perevod=row.perevod+"[apndx]"+exam.perevod.encode('utf-8')+"[/apndx]"
                 row.update_record()
                 updated+=1
     return updated,inserted

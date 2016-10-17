@@ -27,8 +27,8 @@ def normalise_perevod(text):
     perevod=perevod.replace("&","&amp;")#Амперсанд
     perevod=perevod.replace(">","&gt;")#Больше
     perevod=perevod.replace("<","&lt;")#Меньше
-    perevod=perevod.replace("'","&apos;")#Апостроф
-    perevod=perevod.replace('"',"&quot;")#Кавычка
+    #perevod=perevod.replace("'","&apos;")#Апостроф
+    #perevod=perevod.replace('"',"&quot;")#Кавычка
     #Очищаем или преобразуем некоторые конструкции синтаксиса словаря
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
     perevod=perevod.replace("[i];[/i]",";")
@@ -180,7 +180,7 @@ def reshala(text):
             value=Storage(
                     id=row.id,
                     slovo=unicode(row.slovo,'utf-8'),
-                    pinyin=row.pinyin,
+                    pinyin=unicode(row.pinyin,'utf-8'),
                     perevod=row.perevod,
                     choiselist=row.choiselist,
                     start=start,
@@ -277,18 +277,30 @@ def splitby(spisok,ngroup):
         if spisok==[]:newspisok.append(x)
     return newspisok
 
+reg_pinyin=re.compile(u"\[b\]([^一-龥]*?)\[/b\]",re.U)#B()
 def extract(perevod):
     """Извлечение примеров из словарной статьи"""
     a=normalise_perevod(perevod)
     exlist=[x for x in reg_ex.findall(a)]#Список примеров
-    #Добавляем разделитель <exsep> в конце китайского текста
-    exlist=[re.sub(u"([\\\[\]0-9a-zA-Z]*[а-яёА-ЯЁ])",r"<exsep>\1",x,count=1,flags=re.U) for x in exlist]
-    #Добавляем разделитель <exsep> в конце, если нет русского текста
-    exlist=[x if re.search(u"[а-яёА-ЯЁ]",x,re.U) else x+"<exsep>" for x in exlist]
+
+    exlist=[x.replace("\[","\{").replace("\]","\}") for x in exlist]
+    exlist=[re.sub(u"\[([a-z]+)\]([一-龥]*?)\[/([a-z]+)\]",r"{\1}\2{/\3}",x,flags=re.U) for x in exlist]
+
+    #Добавляем разделитель "\n " перед началом русского текста
+    exlist=[re.sub(u"""((\[[bcip]*?\].*?\[/[bcip]*?\]|[ -\{«(\\\[\]cip*°0-9])*?[а-яёА-ЯЁ])""",r"\n \1",x,count=1,flags=re.U) for x in exlist]
+    #Добавляем разделитель "\n " перед началом английского текста, если нет русского текста
+    exlist=[x if re.search(u"[а-яёА-ЯЁ]",x,re.U) else re.sub(u"""((\[[bcip]*?\].*?\[/[bcip]*?\]|[ -\{«(\\\[\]cip*°0-9])*?[a-zA-Z])""",r"\n \1",x,count=1,flags=re.U) for x in exlist]
+    #Добавляем разделитель "\n " в конце, если нет ни русского, ни английского текста
+    exlist=[x if re.search(u"[а-яёА-ЯЁa-zA-Z]",x,re.U) else x+"\n " for x in exlist]
+
+    exlist=[x.replace("\{","\[").replace("\}","\]") for x in exlist]
+    exlist=[re.sub(u"{([a-z]+)}([一-龥]*?){/([a-z]+)}",r"[\1]\2[/\3]",x,flags=re.U) for x in exlist]
+
     exlist1=[]
     for x in exlist:
-        slovo,perevod=x.split("<exsep>")
-        pinyin=";".join([y for y in reg_b.findall(slovo)])
-        slovo=reg_b.sub(r"",slovo)
-        exlist1.append(Storage(slovo=slovo,pinyin=pinyin,perevod=perevod))
+        slovo,perevod=x.split("\n ")
+        pinyin=";".join([y for y in reg_pinyin.findall(perevod)]+[z for z in reg_pinyin.findall(slovo)]).replace("("," ").replace(")"," ")
+        perevod=reg_pinyin.sub(r"",perevod)
+        slovo=reg_pinyin.sub(r"",slovo)
+        exlist1.append(Storage(slovo=slovo.strip(),pinyin=pinyin.strip(),perevod=perevod.strip()))
     return exlist1

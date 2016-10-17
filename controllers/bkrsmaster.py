@@ -109,8 +109,8 @@ def addworker():
 def addtask():
     #taskfunc=reporting_percentages
     #taskfunc=sozdanie_bazy
-    #taskfunc=extract_examles
-    taskfunc=calc_records
+    taskfunc=extract_examles
+    #taskfunc=calc_records
     #taskfunc=createlinks
     #taskfunc=choiselist
     task_name=taskfunc.__doc__.split("\n")[0] if taskfunc.__doc__!=None else taskfunc.__name__

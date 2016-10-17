@@ -9,14 +9,14 @@ slovar = db.define_table('slovar',
     Field('dlina','integer',label="Длина"),
     Field('choiselist','list:string', default=[],label="Варианты"),
     Field('linksto','list:reference slovar', default=[],writable=False, readable=False,label="Ссылка на"),
-    Field('linksfrom','list:reference slovar', default=[],writable=False, readable=False,label="Ссылка c"),
+    Field('linksfrom','list:reference slovar', default=[],writable=False, readable=True,label="Ссылка c"),
     Field.Virtual('short',lambda row:"",label="Примеры"),
     Field('processed', 'boolean', default=False,label="Обработан"),
     Field('is_example', 'boolean', default=False,label="Это пример?"),
     Field('is_valid', 'boolean',label="Валидный"),
-    Field('with_appendix', 'boolean',label="С приложением"),
+    Field('with_appendix', 'boolean',label="С дополнением"),
     Field('with_examples', 'boolean',label="С примерами"),
-    Field('with_ru', 'boolean',label="С переводом"),
+    Field('with_ru', 'boolean',label="С русским переводом"),
     auth.signature,#Поля пользователей
     Field('is_active', 'boolean',writable=False, readable=False, default=True),#для контроля версий
     #migrate=True, fake_migrate=True,#если база заполнена вне web2py, то расскомментировать, запустить просмотр базы и обратно закомментировать
@@ -27,7 +27,7 @@ slovar.dlina.compute=lambda row:len(row.slovo if isinstance(row.slovo,unicode) e
 slovar.is_valid.compute=lambda row:re.search(r"[a-zA-Z 0-9\[\](),.-]",row.slovo if isinstance(row.slovo,unicode) else unicode(row.slovo, 'utf-8'),re.U)==None
 slovar.with_appendix.compute=lambda row:re.search(r"\[apndx\]",row.perevod)!=None
 slovar.with_examples.compute=lambda row:re.search(r"\[ex{0,1}\]",row.perevod)!=None
-slovar.with_ru.compute=lambda row:re.search(r"[а-яёА-ЯЁ]",row.perevod)!=None
+slovar.with_ru.compute=lambda row:re.search(u"[а-яёА-ЯЁ]",row.perevod if isinstance(row.perevod,unicode) else unicode(row.perevod, 'utf-8'),re.U)!=None
 
 """slovar._enable_record_versioning(#включаем версионность
     archive_db=db,#версии храним в этойже базе
