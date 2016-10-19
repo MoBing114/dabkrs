@@ -23,6 +23,8 @@ def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки])
     синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
     perevod=unicode(text, 'utf-8') if not isinstance(text,unicode) else text
+    #Удаляем знаки переноса на новую строку
+    perevod=perevod.replace("\n","")
     #Эранируем управл. символы html, если они есть в тексте
     perevod=perevod.replace("&","&amp;")#Амперсанд
     perevod=perevod.replace(">","&gt;")#Больше
@@ -32,19 +34,15 @@ def normalise_perevod(text):
     #Очищаем или преобразуем некоторые конструкции синтаксиса словаря
     perevod=perevod.replace("[m1]-----[/m]","[m1]")
     perevod=perevod.replace("[i];[/i]",";")
-    perevod=perevod.replace("[*][ex]","[ex]")
-    perevod=perevod.replace("[/ex][/*]","[/ex]")
-    perevod=perevod.replace("[*]","[ex]")
-    perevod=perevod.replace("[/*]","[/ex]")
-    perevod=perevod.replace("[e]","[ex]")
-    perevod=perevod.replace("[/e]","[/ex]")
+    perevod=perevod.replace("[i].[/i]",".")
+    perevod=perevod.replace("[i] [/i]"," ")
+    perevod=perevod.replace("[*][ex]","[ex]").replace("[/ex][/*]","[/ex]")
+    perevod=perevod.replace("[*]","[ex]").replace("[/*]","[/ex]")
+    perevod=perevod.replace("[e]","[ex]").replace("[/e]","[/ex]")
     #Перенос скобок во внутрь тэгов
-    perevod=perevod.replace("([i]","[i](")
-    perevod=perevod.replace("[/i])",")[/i]")
-    perevod=perevod.replace("([c]","[c](")
-    perevod=perevod.replace("[/c])",")[/c]")
-    perevod=perevod.replace("([b]","[b](")
-    perevod=perevod.replace("[/b])",")[/b]")
+    perevod=perevod.replace("([i]","[i](").replace("[/i])",")[/i]")
+    perevod=perevod.replace("([c]","[c](").replace("[/c])",")[/c]")
+    perevod=perevod.replace("([b]","[b](").replace("[/b])",")[/b]")
     #Проверка соблюдения правил вложенности
     perevod1=[]#Список отбработанных частей
     #разобъем строку по закрывающему тэгу абзаца "[/m]"
@@ -120,7 +118,7 @@ def sokr_perevod(perevod,slovo,*args):
     tagObj.elements('div',_class=re.compile(r'm[1-4]'),replace=lambda div: split_perevod(div,slovo))#Непустые блоки преобразуем в элементы списка
     values=[]
     for value in [x.flatten().strip() for x in tagObj.elements('li')]:
-        if not value in values and re.search(u"[一-龥]",unicode(value, 'utf-8'),re.U)==None: values.append(value)
+        if not value in values and re.search(u"[。（ ）【 】～！”“；：《》一-龥]",unicode(value, 'utf-8'),re.U)==None: values.append(value)
     tagObj=UL(values)
     return tagObj
 
@@ -283,24 +281,27 @@ def extract(perevod):
     a=normalise_perevod(perevod)
     exlist=[x for x in reg_ex.findall(a)]#Список примеров
 
+    #Предобработка
     exlist=[x.replace("\[","\{").replace("\]","\}") for x in exlist]
-    exlist=[re.sub(u"\[([a-z]+)\]([一-龥]*?)\[/([a-z]+)\]",r"{\1}\2{/\3}",x,flags=re.U) for x in exlist]
+    exlist=[re.sub(u"\[([ a-z]+)\]([一-龥]*?)\[/([ a-z]+)\]",r"{\1}\2{/\3}",x,flags=re.U) for x in exlist]
 
     #Добавляем разделитель "\n " перед началом русского текста
-    exlist=[re.sub(u"""((\[[bcip]*?\].*?\[/[bcip]*?\]|[ -\{«(\\\[\]cip*°0-9])*?[а-яёА-ЯЁ])""",r"\n \1",x,count=1,flags=re.U) for x in exlist]
+    exlist=[re.sub(u"""((?:\[[bcip]*?\].*?\[/[bcip]*?\]|[ \{«(\\\[\]cip*°0-9-])*?[а-яёА-ЯЁ])""",r"\n \1",x,count=1,flags=re.U) for x in exlist]
     #Добавляем разделитель "\n " перед началом английского текста, если нет русского текста
-    exlist=[x if re.search(u"[а-яёА-ЯЁ]",x,re.U) else re.sub(u"""((\[[bcip]*?\].*?\[/[bcip]*?\]|[ -\{«(\\\[\]cip*°0-9])*?[a-zA-Z])""",r"\n \1",x,count=1,flags=re.U) for x in exlist]
+    exlist=[x if re.search(u"[а-яёА-ЯЁ]",x,re.U) else re.sub(u"""((?:\[[bcip]*?\].*?\[/[bcip]*?\]|[ \{«(\\\[\]cip*°0-9-])*?[a-zA-Z])""",r"\n \1",x,count=1,flags=re.U) for x in exlist]
     #Добавляем разделитель "\n " в конце, если нет ни русского, ни английского текста
     exlist=[x if re.search(u"[а-яёА-ЯЁa-zA-Z]",x,re.U) else x+"\n " for x in exlist]
 
+    #Постобработка
     exlist=[x.replace("\{","\[").replace("\}","\]") for x in exlist]
-    exlist=[re.sub(u"{([a-z]+)}([一-龥]*?){/([a-z]+)}",r"[\1]\2[/\3]",x,flags=re.U) for x in exlist]
+    exlist=[re.sub(u"{([ a-z]+)}([一-龥]*?){/([ a-z]+)}",r"[\1]\2[/\3]",x,flags=re.U) for x in exlist]
 
+    #Разбивка
     exlist1=[]
     for x in exlist:
         slovo,perevod=x.split("\n ")
         pinyin=";".join([y for y in reg_pinyin.findall(perevod)]+[z for z in reg_pinyin.findall(slovo)]).replace("("," ").replace(")"," ")
         perevod=reg_pinyin.sub(r"",perevod)
         slovo=reg_pinyin.sub(r"",slovo)
-        exlist1.append(Storage(slovo=slovo.strip(),pinyin=pinyin.strip(),perevod=perevod.strip()))
+        exlist1.append(Storage(slovo=slovo.strip(),pinyin=pinyin.strip('\t :-;.'),perevod=perevod.strip('\t :-;.,')))
     return exlist1
