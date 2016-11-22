@@ -43,6 +43,7 @@ def normalise_perevod(text):
     perevod=perevod.replace("([i]","[i](").replace("[/i])",")[/i]")
     perevod=perevod.replace("([c]","[c](").replace("[/c])",")[/c]")
     perevod=perevod.replace("([b]","[b](").replace("[/b])",")[/b]")
+    perevod=perevod.replace(u"①","[m1]1)").replace(u"②","[m1]2)").replace(u"③","[m1]3)").replace(u"④","[m1]4)")
     #Проверка соблюдения правил вложенности
     perevod1=[]#Список отбработанных частей
     #разобъем строку по закрывающему тэгу абзаца "[/m]"
@@ -119,8 +120,8 @@ def sokr_perevod(perevod,slovo,*args):
     values=[]
     for value in [x.flatten().strip() for x in tagObj.elements('li')]:
         if not value in values and re.search(u"[。（ ）【 】～！”“；：《》一-龥]",unicode(value, 'utf-8'),re.U)==None: values.append(value)
-    tagObj=UL(values)
-    return tagObj
+    #tagObj=UL(values)
+    return values#tagObj
 
 re_pass=re.compile(u"[ 。.а-яёА-ЯЁa-zA-Z0-9（ ）【 】～！”“；：《》<>=+\-]")#Группа символов, содержащие символы в скобках, пропускается
 

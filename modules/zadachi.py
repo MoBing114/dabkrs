@@ -173,9 +173,9 @@ def choiselist():
     for x in rows.iterselect(slovar.id,slovar.slovo,slovar.perevod,slovar.choiselist):
         i+=1
         print '!clear!Анализ перевода слова id={0:d}. Готовность {1:.2%}'.format(x.id,float(i)/n)
-        slovlist=sokr_perevod(x.perevod,x.slovo).elements('li')
+        slovlist=sokr_perevod(x.perevod,x.slovo)#.elements('li')
         if slovlist!=None:
-            x.update_record(choiselist=[y.flatten() for y in slovlist])
+            x.update_record(choiselist=slovlist)#[y.flatten() for y in slovlist])
         if i%10000==0:db.commit()#Фиксируем каждые 10000 обновлений
     db.commit()
     return "Complite"

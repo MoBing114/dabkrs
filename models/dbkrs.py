@@ -10,7 +10,6 @@ slovar = db.define_table('slovar',
     Field('choiselist','list:string', default=[],label="Варианты"),
     Field('linksto','list:reference slovar', default=[],writable=False, readable=False,label="Ссылка на"),
     Field('linksfrom','list:reference slovar', default=[],writable=False, readable=True,label="Ссылка c"),
-    Field.Virtual('short',lambda row:"",label="Примеры"),
     Field('processed', 'boolean', default=False,label="Обработан"),
     Field('is_example', 'boolean', default=False,label="Это пример?"),
     Field('is_valid', 'boolean',label="Валидный"),
@@ -28,6 +27,9 @@ slovar.is_valid.compute=lambda row:re.search(r"[a-zA-Z 0-9\[\](),.-]",row.slovo 
 slovar.with_appendix.compute=lambda row:re.search(r"\[apndx\]",row.perevod)!=None
 slovar.with_examples.compute=lambda row:re.search(r"\[ex{0,1}\]",row.perevod)!=None
 slovar.with_ru.compute=lambda row:re.search(u"[а-яёА-ЯЁ]",row.perevod if isinstance(row.perevod,unicode) else unicode(row.perevod, 'utf-8'),re.U)!=None
+#Виртуальные поля
+slovar.choisecalc=Field.Virtual('choisecalc',lambda row:"",label="Тест варианты")
+slovar.short=Field.Virtual('short',lambda row:"",label="Тест примеры")
 
 """slovar._enable_record_versioning(#включаем версионность
     archive_db=db,#версии храним в этойже базе
@@ -45,3 +47,4 @@ slovar.perevod.represent=repres_perevod#Заменяем DSL-тэги на HTML-
 slovar.linksfrom.represent=lambda value,row:UL([A(x,_href=URL(c="slovar",f="slovo",vars=dict(id=x))) for x in value])
 slovar.choiselist.represent=lambda value,row:UL([x for x in value])
 slovar.short.represent=lambda value,row: TABLE([[x.slovo,x.pinyin,x.perevod]for x in extract(row.perevod)],_border="2px")
+slovar.choisecalc.represent=lambda value,row: UL(sokr_perevod(row.perevod,row.slovo))
