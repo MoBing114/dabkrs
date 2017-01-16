@@ -46,7 +46,7 @@ def slovo():
             DIV(first.slovo,_class="ch2 col-md-12",_id="kitext",data={'spy':'affix','offset-top':'50'}),
             DIV(repres_perevod(first.pinyin),_class="py"),
             DIV(repres_perevod(first.perevod),_class="ru"),
-            _class="iskomyi-text row"
+            _class="iskomyi-text col-md-12"
             )
         if rez==[]:
             bywords,slovlist="",""
@@ -64,13 +64,13 @@ def slovo():
                     _slovo=x.slovo#само слово
                         )
                      for i,x in enumerate(rez)],
-                _class="row",
+                _class="col-md-12",
                 _id="shkatulka-slov"
             )
             #Блок псевдоперевода (экспериментальный), берет только первые слова из списка и сшивает в предложение
             slovlist=DIV(
                 DIV("Псевдоперевод:",_class="txt-label ru"),
                 " ".join([x.choiselist[0] if x.choiselist!=None and x.choiselist!=[] else x.slovo for x in rez if x!=None]),
-                _class="slovlist row"
+                _class="slovlist col-md-12"
             )
     return dict(form=form,first=first,bywords=bywords,slovlist=slovlist)

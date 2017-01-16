@@ -1,0 +1,127 @@
+<aside class="main-sidebar">
+    <section class="sidebar">
+    {{if auth.user:}}
+        <div class="user-panel">
+            <div class="pull-left image">
+                <img src="{{=plugins.layout_starter.useravatar}}" class="img-circle" alt="User Image">
+            </div>
+            <div class="pull-left info">
+                <p>{{=auth.user.first_name}} {{=auth.user.last_name}}</p>
+                {{# Status }}
+                <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+            </div>
+        </div>
+    {{pass}}
+    {{#if auth.user and is_user_member('admins'):}}
+        <ul class="sidebar-menu">
+            <li class="web2py-menu-first web2py-menu-active">
+                <a href="#searchModalBox" data-toggle="modal"><i class="fa fa-search fa-lg"></i><span>{{=T('Search')}}</span></a>
+            </li></ul>
+        <style>
+        #slider {color: #66666;font-family: Georgia;font-size: 14px;}.header {border: 1px solid #cccccc;padding: 8px;margin-top: 5px;cursor: pointer;max-height: 200px; /* Максимальная высота */overflow:auto/*text-align: center;*/}.header:hover {color: #666666;}.content {overflow: hidden;}.text {border: 1px solid #cccccc;border-top: none;padding: 15px;text-align: left;background: #eeeeee;font-size: 14px;}
+        </style>
+    {{#pass}}
+    {{# Sidebar Menu }}
+        {{=MENU([menu_item_converter(x) for x in plugins.layout_starter.menu], _class='sidebar-menu',li_class='treeview',ul_class='treeview-menu') if plugins.layout_starter.menu else ''}}
+        {{if auth.user and is_user_member('admins'):}}
+        {{=MENU([menu_item_converter(x) for x in plugins.layout_starter.admin_menu],_class='sidebar-menu',li_class='treeview',ul_class='treeview-menu') if plugins.layout_starter.admin_menu else ''}}
+        {{pass}}
+    {{# /Sidebar Menu }}
+    </section>
+    {{# /.sidebar }}
+</aside>
+<div id="searchModalBox" class="modal fade">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <!-- Заголовок модального окна -->
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <br>
+          <form action="" method="get" id="side-search-keywords">
+              <div class="input-group">
+                  <input id="side-keywords" type="text" name="sidekeywords" class="form-control" placeholder="{{=T('Search...')}}">
+                  <span class="input-group-btn">
+                      <button type="submit" name="search" id="search-btn" class="btn btn-flat">
+                          <i class="fa fa-search"></i>
+                      </button>
+                  </span>
+              </div>
+          </form>
+      </div>
+      <!-- Основное содержимое модального окна -->
+      <div class="modal-body">
+          <div class="tabbable">
+              <ul class="nav nav-tabs">
+                  <li class="active"><a href="#side-search-resault" data-toggle="tab">Поиск 1</a></li>
+              </ul>
+              <div class="tab-content">
+                  <div class="tab-pane active" id="side-search-resault"></div>
+              </div>
+          </div>
+      </div>
+      <!-- Футер модального окна -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+ <script>
+     function jsonparse(jsonresponse){
+         var data=$.parseJSON(jsonresponse),
+             message=data['message'],
+             keywords=data['keywords'],
+             content=data['content'],
+             resault=[];
+             $.each(content,function(tname,trows){
+                 var keys=trows['keys'],
+                     values=trows['values'],
+                     divrows=[];
+                 $.each(values,function(index,value){
+                     var valuex=[];
+                     $.each(value,function(index1,value1){
+                         if ($.type(value1)==='array'){
+                             valuex.push('<div class="'+keys[index1]+'"><ul><li>'+value1.join('</li><li>')+'</li></ul></div>');
+                         } else {
+                             valuex.push('<div class="'+keys[index1]+'"><ul><li>'+value1+'</li></ul></div>');
+                         };
+                     });
+                     divrows.push('<div class="header">'+valuex.toString()+'</div>')
+                 });
+                 resault.push('<div class="'+tname+'">'+divrows.toString()+'</div>');
+             });
+         console.log(resault.toString());
+         return resault.toString();
+     };
+     $(function() {
+         $('#side-search-keywords').submit(function(e) {
+             var $data={'{{=plugins.layout_starter.seach_variable}}':$(this).find('#side-keywords').val()},
+                 $form = $(this);
+             $.ajax({
+                 type: $form.attr('method'),
+                 url: "{{=plugins.layout_starter.seach_url}}",
+                 data: $data,
+                 dataType:'html',
+                 success: function(response) {
+                     $("#side-search-resault").html(jsonparse(response));
+                     //
+                     jQuery('#side-search-resault').unhighlight();
+                     var v = jQuery('#side-keywords').val();
+                     if (v) jQuery('#side-search-resault').highlight(v);
+                     ///
+                     jQuery('#side-keywords').bind('keyup', function() {
+                         jQuery('#side-search-resault').unhighlight();
+                         var v = jQuery(this).val();
+                         if (v) jQuery('#side-search-resault').highlight(v);
+                     });
+                     $("#searchModalBox").modal('show');
+                 },
+                 error: function(response) {
+                     $("#side-search-resault").html(response);
+                 }
+             });
+             //отмена действия по умолчанию для кнопки submit
+             e.preventDefault();
+         });
+     });
+</script>

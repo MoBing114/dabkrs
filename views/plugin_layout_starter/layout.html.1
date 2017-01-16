@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>{{=response.title or request.application}}</title>
+
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <link rel="shortcut icon" href="{{=URL('static','plugin_layout_starter/images/favicon.ico')}}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{=URL('static','plugin_layout_starter/images/favicon.ico')}}">
+
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/plugins/bootstrap/css/bootstrap.min.css')}}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/font-awesome.min.css')}}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/ionicons.min.css')}}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/AdminLTE.min.css')}}">
+    <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
+page. However, you can choose any other skin. Make sure you
+apply the skin class to the body tag so the changes take effect.
+-->
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/skins/_all-skins.min.css')}}">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+<![endif]-->
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/web2py.css')}}">
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/web2py-bootstrap3.css')}}">
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/starter.css')}}">
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/contract.css')}}">
+    <link rel="stylesheet" href="{{=URL('static','plugin_layout_starter/css/bookmark.css')}}">
+    {{include 'plugin_layout_starter/web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+    {{
+    # using sidebars need to know what sidebar you want to use
+    mc0 = 'col-md-12 col-sm-12 col-xs-12'
+    mc1 = 'col-md-8 col-sm-8 col-xs-12'
+    mc2 = 'col-md-4 col-sm-8 col-xs-12'
+    left_sidebar_enabled = globals().get('left_sidebar_enabled', False)
+    right_sidebar_enabled = globals().get('right_sidebar_enabled', False)
+    middle_column = {0: mc0, 1: mc1, 2: mc2}[
+    (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
+    }}
+
+</head>
+{{"""
+BODY TAG OPTIONS:
+=================
+Apply one or more of the following classes to get the
+desired effect
+|---------------------------------------------------------|
+| SKINS         | skin-blue                               |
+|               | skin-black                              |
+|               | skin-purple                             |
+|               | skin-yellow                             |
+|               | skin-red                                |
+|               | skin-green                              |
+|---------------------------------------------------------|
+|LAYOUT OPTIONS | fixed                                   |
+|               | layout-boxed                            |
+|               | layout-top-nav                          |
+|               | sidebar-collapse                        |
+|               | sidebar-mini                            |
+|---------------------------------------------------------|
+"""}}
+{{# Определяем каким выдавать боковое меню (свернутым/развернутым) из полученных куки}}
+{{collapse=False}}
+{{if request.cookies.has_key('sidebar-collapse'):}}
+    {{collapse=request.cookies['sidebar-collapse'].value=='true'}}
+{{pass}}
+
+<body class="layout-boxed hold-transition skin-black sidebar-mini {{=' sidebar-collapse' if collapse else ''}}">
+    <div class="wrapper">
+        {{# Main Header }}
+        <header class="main-header">
+            {{# Logo }}
+            <a href="{{=URL('default','index')}}" class="logo">
+                {{# mini logo for sidebar mini 50x50 pixels }}
+                <span class="logo-mini">
+                    {{=response.logo_mini or XML('<i class="glyphicon glyphicon-home" aria-hidden="true"></i>')}}
+                </span>
+                {{# logo for regular state and mobile devices }}
+                <span class="logo-lg">
+                    {{=response.logo}}
+                </span>
+            </a>
+            {{# Header Navbar }}
+            <nav class="navbar navbar-static-top" role="navigation">
+                <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"><span class="sr-only">Toggle navigation</span></a>{{# Sidebar toggle button }}
+                <div class="navbar-custom-menu">{{# Navbar Right Menu }}
+                    <ul class="nav navbar-nav">
+                        {{if auth.user and is_user_member('admins'):}}
+                            {{#=LOAD('message', 'menu.load', ajax=True, content='')}}{{# Messages Menu (<li> element)}}
+                            {{#include 'plugin_layout_starter/layout_notific_menu.html' # Notifications Menu (<li> element) }}
+                            {{#include 'plugin_layout_starter/layout_tasks_menu.html' # Tasks Menu (<li> element)}}
+                        {{pass}}
+                        {{if auth.user:}}
+                            {{include 'plugin_layout_starter/layout_user_account_menu.html' # User Account Menu (<li> element)}}
+                            <li><a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a></li>{{# Control Sidebar Toggle Button }}
+                        {{else:}}
+                            {{include 'plugin_layout_starter/layout_log_in_menu.html' # Log In Menu (<li> element) }}
+                        {{pass}}
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        {{include 'plugin_layout_starter/layout_menu.html' # Left side column. contains the logo and sidebar}}
+        {{#include 'plugin_layout_starter/layout_search_modalbox.html'}}
+        {{#include 'plugin_layout_starter/layout_control_sidebar.html' # Control Sidebar }}
+        {{# Content Wrapper. Contains page content }}
+        <div class="content-wrapper">
+            {{if response.flash:}}
+                <section class="content-header">
+                  <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">×</span>
+                    </button>
+                    {{=response.flash}}
+                  </div>
+                </section>
+            {{pass}}
+            {{#include 'plugin_layout_starter/layout_bookmarks.html' # Content Header (Page header) }}
+            {{# Main content }}
+            <section class="content">
+              {{# Your Page Content Here }}
+              <div class="row">
+                    {{if left_sidebar_enabled:}}
+                        <div class="col-md-4 col-sm-4 hidden-xs">
+                            <div class="row">
+                          {{block left_sidebar}}
+                          {{end}}
+                            </div>
+                        </div>
+                    {{pass}}
+                    <div class="{{=middle_column}}">
+                        <div class="row">
+                      {{block center}}
+                          {{include}}
+                      {{end}}
+                        </div>
+                    </div>
+                    {{if right_sidebar_enabled:}}
+                        <div class="col-md-4 col-sm-4 hidden-xs">
+                            <div class="row">
+                          {{block right_sidebar}}
+                          {{end}}
+                            </div>
+                        </div>
+                    {{pass}}
+              </div>
+            </section> {{# /.content }}
+        </div>{{# /.content-wrapper }}
+        {{# Main Footer }}
+        <footer class="main-footer">
+            {{# To the right }}
+            {{if auth.user and is_user_member('admins'):}}
+                <div class="pull-right hidden-xs">
+                  {{#include 'plugin_layout_starter/plugin_create_trello_card.html'}}
+                  <a href="#{{#=URL('default', 'changelog')}}">Version {{=response.version}}</a>
+                </div>
+            {{pass}}
+            {{# Default to the left }}
+            <div>
+                <strong>
+                    Copyright &copy;
+                    <script>document.write(new Date().getFullYear());</script>
+                    <a href="#">{{=response.company}}</a>.
+                </strong> All rights reserved.
+            </div>
+        </footer>
+    </div>{{# /.wrapper }}
+    <!-- The javascript =============================== -->
+    <!-- Bootstrap 3.3.7 -->
+    <script src="{{=URL('static','plugin_layout_starter/plugins/bootstrap/js/bootstrap.min.js')}}"></script>
+     <!-- AdminLTE App -->
+    <script src="{{=URL('static','plugin_layout_starter/js/app.js')}}"></script>
+    <script src="{{=URL('static','plugin_layout_starter/js/jquery.cookie.js')}}"></script>
+    <script src="{{=URL('static','plugin_layout_starter/js/web2py-bootstrap3.js')}}"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            //Сохраняем ссылку на стандартный метод jQuery
+            var originalAddClassMethod = jQuery.fn.addClass;
+            var originalDelClassMethod = jQuery.fn.removeClass;
+            //Переопределяем
+            $.fn.addClass = function(){
+                var result = originalAddClassMethod.apply(this, arguments);
+                //Инициализируем событие смены класса
+                $(this).trigger('cssClassChanged');
+                return result;
+            }
+            $.fn.removeClass = function(){
+                var result = originalDelClassMethod.apply(this, arguments);
+                //Инициализируем событие смены класса
+                $(this).trigger('cssClassChanged');
+                return result;
+            }
+            $("body").bind('cssClassChanged', function(){
+                //Отработает, как только сменится класс
+                $.cookie('sidebar-collapse',$("body").hasClass("sidebar-collapse"));
+            });
+           //if ($.cookie('sidebar-collapse')=='true'){$("body").addClass("sidebar-collapse")};//сохраняем состояние меню
+        });
+    </script>
+     <!-- Скрипты для выделения искомого текста -->
+    {{=SCRIPT(_src=URL('static','plugin_layout_starter/js/jquery.highlight.js'), _type='text/javascript')}}
+    {{=SCRIPT(_src=URL('static','plugin_layout_starter/js/highlight-web2py-grid.js'), _type='text/javascript')}}
+    {{=STYLE(".highlight {background-color: yellow}")}}
+    <!-- конец блока -->
+    {{block page_js}}{{end page_js}}
+</body>
+</html>

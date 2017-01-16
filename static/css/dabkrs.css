@@ -3,7 +3,7 @@
   height: 600px;
   overflow-y: scroll;
 }
-#kitext.affix {top:30px;background:white;z-index:1;padding:1%;margin-bottom:5px;left:0}
+#kitext.affix {top:0px;background:white;z-index:1;padding:1%;margin-bottom:5px;/*left:0*/width:inherit;}
 [id^="kitext"]{font-size:16pt;}
 .web2py_console #w2p_keywords {width: 80%;}
 .iskomyi-text{font-size:12pt;text-align:left;font-family:simsun, Nsimsun, STSong, STKaiti, sans-serif, arial;}
@@ -58,10 +58,10 @@ a:hover{color:green}
 .py{font-family:STSong, STKaiti, sans-serif, arial;font-size:12pt;font-weight:bold;}
 .ru{font-family:arial;font-size:12pt;}
 .highlight {background-color: yellow;}
-.m1{margin-left:5%;font-size:12pt;font:bold;}
-.m2{margin-left:10%;font-size:11pt;}
-.m3{margin-left:15%;font-size:10pt;}
-.m4{margin-left:20%;font-size:9pt;}
+.m1{margin-left:5%;font-size:10pt;font:bold;}
+.m2{margin-left:10%;font-size:9pt;}
+.m3{margin-left:15%;font-size:8pt;}
+.m4{margin-left:20%;font-size:8pt;}
 .green {color:green}
 .ex {color:#666666}
 .maroon {color:maroon}

@@ -1,0 +1,33 @@
+<li class="dropdown user user-menu">
+    {{# Menu Toggle Button }}
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        {{# The user image in the navbar}}
+        <img src="{{=plugins.layout_starter.useravatar}}" class="user-image" alt="User Image">
+        {{# hidden-xs hides the username on small devices so only the image appears. }}
+        <span class="hidden-xs">{{=auth.user.first_name}} {{=auth.user.last_name}}</span>
+    </a>
+    <ul class="dropdown-menu">
+        {{# User Menu Header }}
+        <li class="user-header">
+            <img src="{{=plugins.layout_starter.useravatar}}" class="img-circle">
+            <p>
+                {{=auth.user.first_name}} {{=auth.user.last_name}}
+                <small>{{=' | '.join(auth.user_groups.values())}}</small>
+            </p>
+        </li>
+        {{# User Menu Body }}
+        <li class="user-body">
+            <div class="row">
+                <div class="col-xs-4 text-center">
+                    <a href="{{=URL('default', 'user', args=['profile'], vars={'_next': URL()})}}"><i class="fa fa-user"></i><br>{{=T('Profile')}}</a>
+                </div>
+                <div class="col-xs-4 text-center">
+                    <a href="{{=URL('default', 'user', args=['change_password'], vars={'_next': URL()})}}"><i class="fa fa-key"></i><br>{{=T('Password')}}</a>
+                </div>
+                <div class="col-xs-4 text-center">
+                    <a href="{{=URL('default', 'user', args=['logout'], vars={'_next': URL()})}}"><i class="fa fa-sign-out"></i><br>{{=T('Log Out')}}</a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</li>

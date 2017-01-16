@@ -1,0 +1,14 @@
+{{if response.view_title:}}
+    <section class="content-header">
+        <h1>
+           {{=T(response.view_title)}}
+            <small>{{=T(response.subtitle) or ''}}</small>
+            {{include 'bookmark/bookmark_button.html'}}
+        </h1>
+        <ol class="breadcrumb">
+        {{for crumb in session.breadcrumbs:}}
+          <li><a href="{{=crumb['url']}}"><i class="fa fa-{{=crumb['icon']}}"></i>{{=T(crumb['label'])}}</a></li>
+        {{pass}}
+        </ol>
+    </section>
+{{pass}}

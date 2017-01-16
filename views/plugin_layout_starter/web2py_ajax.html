@@ -1,0 +1,24 @@
+<script type="text/javascript">
+    <!--
+    // These variables are used by the web2py_ajax_init function in web2py_ajax.js (which is loaded below).
+    var w2p_ajax_confirm_message = "{{=T('Are you sure you want to delete this object?')}}";
+    var w2p_ajax_disable_with_message = "{{=T('Working...')}}";
+    var w2p_ajax_date_format = "{{=T('%Y-%m-%d')}}";
+    var w2p_ajax_datetime_format = "{{=T('%Y-%m-%d %H:%M:%S')}}";
+    var ajax_error_500 = '{{=T.M('An error occured, please [[reload %s]] the page') % URL(args=request.args, vars=request.get_vars) }}'
+    //
+    -->
+    var w2p_app_name = '{{=request.application}}'  // used in bookmark.js
+</script>
+
+{{
+response.files.insert(0,URL('static','plugin_layout_starter/plugins/jQuery/jquery-3.1.1.min.js'))
+response.files.insert(1,URL('static','plugin_layout_starter/plugins/slimScroll/jquery.slimscroll.min.js'))
+response.files.insert(2,URL('static','plugin_layout_starter/plugins/datepicker/datepicker3.css'))
+response.files.insert(3,URL('static','plugin_layout_starter/plugins/datepicker/bootstrap-datepicker.js'))
+response.files.insert(4,URL('static','plugin_layout_starter/js/starter.js'))
+response.files.insert(5,URL('static','plugin_layout_starter/js/bookmark.js'))
+response.files.insert(6,URL('static','plugin_layout_starter/js/web2py.js'))
+response.include_meta()
+response.include_files()
+}}
