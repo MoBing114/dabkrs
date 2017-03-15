@@ -22,6 +22,7 @@ reg_apndx=re.compile(r"\[apndx\](.*?)\[\/apndx\]")
 def normalise_perevod(text):
     """Функция устраняет незакрытые или неоткрытые тэги (то, что в квадр.скобках [команды, метки])
     синтаксиса словарной статьи, а также преобразует кодировку в 'utf-8' во избежание проблем с кодировкой"""
+    if not text: return ''
     perevod=unicode(text, 'utf-8') if not isinstance(text,unicode) else text
     #Удаляем знаки переноса на новую строку
     perevod=perevod.replace("\n","")
@@ -124,11 +125,13 @@ def sokr_perevod(perevod,slovo,*args):
     #tagObj=UL(values)
     return values#tagObj
 
-re_pass=re.compile(u"[ 。.а-яёА-ЯЁa-zA-Z0-9（ ）【 】～！”“；：《》<>=+\-]")#Группа символов, содержащие символы в скобках, пропускается
 
 def text_tokenizer(txt):
     """Разбирает на отдельные иеролифы(символы) или их возможные сочетания(состоящие из 1 до n-1 символов)"""
     #txt=txt.decode()
+    re_pass=re.compile(u"[ 。.а-яёА-ЯЁa-zA-Z0-9（ ）【 】～！”“；：《》<>=+\-]")#Группа символов, содержащие символы в скобках, пропускается
+    bywords_out=current.db(current.slovar.bywords_out==True).select(current.slovar.slovo, cache=(current.cache.ram,3600),cacheable=True)#Для ускорения выборку сохраняем в кэше и сериализуем
+    bywords_out=[x.slovo for x in bywords_out] if bywords_out else []
     maxn=15#Макс.длина слова
     n=len(txt)#Длина текста
     l=n if n<maxn else maxn
@@ -137,6 +140,7 @@ def text_tokenizer(txt):
         for j in range(i):
             for x in re.finditer(r".{%d}"%(i),txt[j:]):
                 key=x.group(0)
+                if key in bywords_out:continue
                 if re_pass.search(key)!=None:continue
                 value=[(x.start()+j,x.end()+j)]
                 if key in slovdict:
@@ -181,7 +185,7 @@ def reshala(text):
                     id=row.id,
                     slovo=unicode(row.slovo,'utf-8'),
                     pinyin=unicode(row.pinyin,'utf-8'),
-                    perevod=row.perevod,
+                    perevod=row.bywords_short if row.use_short else row.perevod,
                     choiselist=row.choiselist,
                     start=start,
                     end=end,

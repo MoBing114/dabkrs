@@ -1,0 +1,87 @@
+{{extend 'layout.html'}}
+{{block head}}
+<!--link rel="stylesheet" href="{{=URL('static','codemirror/codemirror-5.22.0/doc/docs.css')}}"-->
+<link rel="stylesheet" href="{{=URL('static','codemirror/codemirror-5.22.0/lib/codemirror.css')}}">
+<link rel="stylesheet" href="{{=URL('static','codemirror/codemirror-5.22.0/addon/display/fullscreen.css')}}">
+<link rel="stylesheet" href="{{=URL('static','codemirror/codemirror-5.22.0/theme/night.css')}}">
+<!--link rel="stylesheet" href="{{=URL('static','codemirror/codemirror-5.22.0/addon/lint/lint.css')}}"-->
+
+<script src="{{=URL('static','codemirror/codemirror-5.22.0/lib/codemirror.js')}}"></script>
+<!--script src="{{=URL('static','codemirror/codemirror-5.22.0/addon/mode/multiplex.js')}}"></script-->
+<script src="{{=URL('static','codemirror/codemirror-5.22.0/addon/mode/simple.js')}}"></script>
+<script src="{{=URL('static','codemirror/codemirror-5.22.0/mode/xml/xml.js')}}"></script>
+<script src="{{=URL('static','codemirror/codemirror-5.22.0/addon/display/fullscreen.js')}}"></script>
+<!--script src="{{=URL('static','codemirror/codemirror-5.22.0/addon/lint/lint.js')}}"></script-->
+{{end}}
+<style type="text/css">
+    .text-color-bordered {background-color:red;border-bottom:1px dotted red;}
+    .cm-slovo {background-color:red;}
+    .cm-perevod {background-color:#4c4c2f;}
+    .cm-over {background-color:green;}
+    .cm-cmnt {background-color:pink;}
+    .cm-bar {quotes: "<" ">";}
+    .cm-bar:before {content: open-quote;}
+    .cm-bar:after {content: close-quote;}
+    .cm-tab {quotes: "<" ">";}/* Добавляем перед текстом открывающую кавычку */
+    .cm-tab:before {content: open-quote;}/* Добавляем перед текстом открывающую кавычку */
+    .cm-tab:after {content: close-quote;}/* Добавляем после текста закрывающую кавычку */
+    .CodeMirror{line-height:20pt;}
+    .CodeMirror-fullscreen {z-index:2000;}
+</style>
+<h4>{{=response.title}}</h4>
+<div>
+{{=form}}
+</div>
+<script>
+    CodeMirror.defineSimpleMode("simplemode", {
+  start: [
+      {
+          regex: /(^[^\t]+)(\t)([^\t]+)(\t)([^#][^\t]+)(\t)(#[^\t]+$)/,
+          token: ["slovo","tab","perevod","tab","over","tab","comment"],
+          sol: true
+      },
+      {
+          regex: /(^[^\t]+)(\t)([^\t]+)(\t)([^#\t]+$)/,
+          token: ["slovo","tab","perevod","tab","over"],
+          sol: true
+      },
+      {
+          regex: /(^[^\t]+)(\t)([^\t]+)(\t)(#[^\t]+$)/,
+          token: ["slovo","tab","perevod","tab","comment"],
+          sol: true
+      },
+      {
+         regex: /(^[^\t]+)(\t)([^\t]+\t$)/,
+         token: ["slovo", "tab", "perevod","tab"],
+         sol: true
+     },
+     {
+         regex: /(^[^\t]+)(\t)([^\t]+$)/,
+         token: ["slovo", "tab", "perevod"],
+         sol: true
+     }
+  ]
+});
+    var editor = CodeMirror.fromTextArea(document.getElementById("slov-list"), {
+      mode: "simplemode",
+      lineNumbers: true,
+      lineWrapping: true,
+        gutters: ["CodeMirror-lint-markers"],
+        lint: true,
+        cursorHeight:1,
+        //lineSeparator:"---",
+        indentUnit: 4, // Длина отступа в пробелах.
+        indentWithTabs: true,
+        enterMode: "keep",
+        tabMode: "shift",
+        theme: "night",
+        extraKeys: {
+        "F11": function(cm) {
+          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+        },
+        "Esc": function(cm) {
+          if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+        }
+      }
+    });
+</script>
